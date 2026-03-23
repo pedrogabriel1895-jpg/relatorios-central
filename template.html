@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">Carregando Relatório...</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #020617;
+            color: #f1f5f9;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(at top left, rgba(59, 130, 246, 0.05), transparent 60%),
+                radial-gradient(at bottom right, rgba(16, 185, 129, 0.05), transparent 60%);
+            background-attachment: fixed;
+        }
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2), 0 2px 4px -1px rgba(0,0,0,0.1);
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes growBar { from { height: 0; } }
+        .animate-slide-up { animation: slideUp 0.8s cubic-bezier(0.16,1,0.3,1) forwards; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: slideUp 0.5s ease-out; }
+        .nav-btn { position: relative; padding-bottom: 2px; color: #94a3b8; transition: all 0.3s; }
+        .nav-btn.active { color: #ffffff; font-weight: 600; }
+        .nav-btn.active::after {
+            content: '';
+            position: absolute; bottom: -4px; left: 0;
+            width: 100%; height: 2px;
+            background: linear-gradient(90deg, #3b82f6, #10b981);
+            border-radius: 2px;
+        }
+        .custom-table th {
+            text-transform: uppercase; font-size: 0.7rem; color: #94a3b8;
+            padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .custom-table td { padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.85rem; }
+        #lock-screen {
+            position: fixed; inset: 0; z-index: 9999;
+            background-color: #020617;
+            display: flex; align-items: center; justify-content: center;
+            backdrop-filter: blur(20px);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased h-screen overflow-hidden" id="main-body">
+
+    <div id="lock-screen">
+        <div class="glass-panel p-8 rounded-2xl w-full max-w-md border border-slate-700 shadow-2xl text-center">
+            <div class="mb-6 flex justify-center">
+                <div class="w-16 h-16 bg-blue-600/20 rounded-2xl flex items-center justify-center border border-blue-500/30">
+                    <i data-lucide="lock" class="w-8 h-8 text-blue-400"></i>
+                </div>
+            </div>
+            <h2 class="text-2xl font-bold text-white mb-2">Acesso Restrito</h2>
+            <p class="text-slate-400 text-sm mb-8" id="lock-subtitle">Relatório Estratégico</p>
+            <form onsubmit="event.preventDefault(); checkPassword();" class="space-y-4">
+                <input type="password" id="password-input"
+                    class="w-full bg-slate-900/80 border border-slate-700 text-white text-center text-lg rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all text-black"
+                    placeholder="Digite a senha" autofocus>
+                <button type="submit"
+                    class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl transition-all shadow-lg active:scale-95">
+                    Acessar Relatório
+                </button>
+            </form>
+            <p id="error-message" class="text-red-400 text-xs mt-4 font-medium hidden">Senha incorreta.</p>
+        </div>
+    </div>
+
+    <div id="report-content" class="transition-all duration-700 opacity-0 flex flex-col min-h-screen">
+
+        <header class="fixed top-0 w-full z-50 glass-panel border-b border-white/5 bg-slate-950/80">
+            <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="h-10 w-10 bg-blue-600 rounded-lg flex items-center justify-center font-black text-white" id="header-initials"></div>
+                    <div class="hidden sm:block leading-tight">
+                        <h1 id="header-title" class="text-sm font-bold text-white tracking-wide"></h1>
+                        <p id="header-subtitle" class="text-[10px] text-slate-400 uppercase tracking-widest font-semibold"></p>
+                    </div>
+                </div>
+                <nav class="hidden md:flex gap-8 text-sm">
+                    <button onclick="switchTab('visao-geral')" id="btn-visao-geral" class="nav-btn active">Visão Geral & Objetivo</button>
+                    <button onclick="switchTab('missoes')" id="btn-missoes" class="nav-btn">Rankings & Missões</button>
+                    <button onclick="switchTab('diagnostico')" id="btn-diagnostico" class="nav-btn">Estratégia & Ações</button>
+                </nav>
+            </div>
+        </header>
+
+        <main class="flex-grow pt-28 pb-6 px-4 sm:px-6 max-w-7xl mx-auto w-full">
+
+            <div id="tab-visao-geral" class="tab-content active space-y-12">
+                <div class="grid md:grid-cols-3 gap-6 animate-slide-up" id="kpi-cards"></div>
+
+                <div class="glass-panel p-8 rounded-3xl animate-slide-up relative overflow-hidden">
+                    <div class="relative z-10 space-y-6">
+                        <div>
+                            <h3 class="text-2xl font-bold text-white mb-2 flex items-center gap-2">
+                                <i data-lucide="target" class="text-blue-400"></i> Objetivo Estratégico
+                            </h3>
+                            <p id="objetivo-texto" class="text-slate-300 leading-relaxed text-lg"></p>
+                        </div>
+                        <div class="bg-blue-900/20 p-6 rounded-2xl border border-blue-500/20">
+                            <h4 class="text-blue-400 font-bold uppercase text-xs mb-2 flex items-center gap-2">
+                                <i data-lucide="trending-up"></i> Análise Executiva
+                            </h4>
+                            <p id="analise-executiva" class="text-slate-300 text-sm italic"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-missoes" class="tab-content space-y-10">
+                <div class="glass-panel p-8 rounded-3xl animate-slide-up">
+                    <h3 class="text-xl font-bold text-white mb-6">Adesão por Missão</h3>
+                    <div class="grid gap-4 h-64 items-end pb-2 border-b border-slate-800" id="bar-chart-container"></div>
+                </div>
+
+                <div id="rankings-container" class="space-y-8">
+                    </div>
+            </div>
+
+            <div id="tab-diagnostico" class="tab-content space-y-12">
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="glass-panel p-8 rounded-3xl border-l-4 border-yellow-500">
+                        <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                            <i data-lucide="lightbulb" class="text-yellow-400"></i> Insights Consolidados
+                        </h3>
+                        <p id="insights-texto" class="text-slate-300 text-sm leading-relaxed"></p>
+                    </div>
+                    <div class="glass-panel p-8 rounded-3xl border-l-4 border-red-500">
+                        <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                            <i data-lucide="alert-triangle" class="text-red-400"></i> Pontos de Atenção
+                        </h3>
+                        <p id="atencao-texto" class="text-slate-300 text-sm leading-relaxed"></p>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-8 rounded-3xl border-t-4 border-green-500">
+                    <h3 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                        <i data-lucide="zap" class="text-green-400"></i> Plano de Ataque & Mitigação
+                    </h3>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <h4 class="text-xs font-black text-slate-500 uppercase mb-3">Próximos Passos</h4>
+                            <p id="plano-texto" class="text-slate-300 text-sm whitespace-pre-line"></p>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-black text-slate-500 uppercase mb-3">Ações de Mitigação</h4>
+                            <p id="mitigacao-texto" class="text-slate-300 text-sm whitespace-pre-line"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="evidencia-container" class="hidden">
+                    <h3 class="text-xl font-bold text-white mb-6">Evidência de Destaque</h3>
+                    <img id="evidencia-img" src="" class="rounded-2xl border border-white/10 w-full max-w-2xl mx-auto">
+                </div>
+            </div>
+        </main>
+
+        <footer class="border-t border-slate-800 bg-slate-950/90 py-6 text-center">
+            <p id="footer-texto" class="text-slate-600 text-[10px] uppercase tracking-widest"></p>
+        </footer>
+    </div>
+
+    <script>
+    // VARIÁVEL DE INJEÇÃO DO N8N
+    const REPORT_DATA = {}; 
+
+    const $ = id => document.getElementById(id);
+
+    function renderAll() {
+        const D = REPORT_DATA;
+        if(!D.meta) return;
+
+        // Meta & Auth
+        document.title = D.meta.titulo;
+        $("header-title").textContent = D.meta.titulo;
+        $("header-subtitle").textContent = D.meta.periodo;
+        $("header-initials").textContent = D.meta.projeto;
+        $("footer-texto").textContent = `Gerado em: ${new Date(D.meta.gerado_em).toLocaleString()} | Projeto ${D.meta.projeto}`;
+
+        // Qualitativo
+        $("objetivo-texto").textContent = D.qualitativo.objetivo;
+        $("analise-executiva").textContent = D.qualitativo.analise_executiva;
+        $("insights-texto").textContent = D.qualitativo.insights;
+        $("atencao-texto").textContent = D.qualitativo.pontos_atencao;
+        $("plano-texto").textContent = D.qualitativo.plano_ataque;
+        $("mitigacao-texto").textContent = D.qualitativo.mitigacao;
+        
+        if(D.qualitativo.evidencia_url) {
+            $("evidencia-container").classList.remove("hidden");
+            $("evidencia-img").src = D.qualitativo.evidencia_url;
+        }
+
+        // KPIs (Baseados na última missão do array)
+        const ultimaMissao = D.quantitativo.missoes[0];
+        const totalEngajados = ultimaMissao.ranking.reduce((acc, curr) => acc + curr.engajados, 0);
+        const kpis = [
+            { label: "Mobilizadores na Base", valor: ultimaMissao.ranking.reduce((acc, curr) => acc + curr.baseTotal, 0), cor: "blue" },
+            { label: "Total Engajados (Última Missão)", valor: totalEngajados, cor: "emerald" },
+            { label: "Missões no Período", valor: D.quantitativo.missoes.length, cor: "yellow" }
+        ];
+        $("kpi-cards").innerHTML = kpis.map(k => `
+            <div class="glass-panel p-6 rounded-2xl border-l-4 ${k.cor === 'blue' ? 'border-blue-500' : k.cor === 'emerald' ? 'border-emerald-500' : 'border-yellow-500'}">
+                <p class="text-xs text-slate-400 uppercase font-bold mb-1">${k.label}</p>
+                <span class="text-3xl font-black text-white">${k.valor}</span>
+            </div>
+        `).join("");
+
+        // Gráfico de Barras (Engajamento Geral por Missão)
+        const barContainer = $("bar-chart-container");
+        barContainer.style.gridTemplateColumns = `repeat(${D.quantitativo.missoes.length}, minmax(0, 1fr))`;
+        
+        barContainer.innerHTML = D.quantitativo.missoes.map((m, i) => {
+            const mediaEngajamento = m.ranking.reduce((acc, curr) => acc + curr.percentualEngajamento, 0) / m.ranking.length;
+            return `
+                <div class="flex flex-col items-center gap-2 h-full justify-end group">
+                    <span class="text-emerald-400 font-bold text-xs">${mediaEngajamento.toFixed(1)}%</span>
+                    <div class="w-full bg-blue-600 rounded-t-lg hover:bg-blue-400 transition-all" style="height:${mediaEngajamento}%"></div>
+                    <span class="text-[10px] text-slate-500 font-bold uppercase text-center">${m.nome_missao}</span>
+                </div>
+            `;
+        }).join("");
+
+        // Tabelas de Ranking (Uma por missão)
+        $("rankings-container").innerHTML = D.quantitativo.missoes.map(m => `
+            <div class="glass-panel rounded-3xl overflow-hidden">
+                <div class="p-6 bg-slate-900/50 border-b border-slate-800">
+                    <h4 class="font-bold text-white italic">Missão: ${m.nome_missao}</h4>
+                </div>
+                <table class="w-full custom-table">
+                    <thead>
+                        <tr>
+                            <th>Grupo</th>
+                            <th class="text-center">Base</th>
+                            <th class="text-center">Engajados</th>
+                            <th class="text-right">% Adesão</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${m.ranking.map(r => `
+                            <tr class="hover:bg-white/5">
+                                <td class="font-bold text-slate-200">${r.grupo}</td>
+                                <td class="text-center text-slate-400">${r.baseTotal}</td>
+                                <td class="text-center text-slate-300">${r.engajados}</td>
+                                <td class="text-right font-black ${r.percentualEngajamento > 50 ? 'text-green-400' : 'text-yellow-500'}">${r.percentualEngajamento}%</td>
+                            </tr>
+                        `).join("")}
+                    </tbody>
+                </table>
+            </div>
+        `).join("");
+
+        lucide.createIcons();
+    }
+
+    function checkPassword() {
+        const input = $("password-input");
+        if (input.value === REPORT_DATA.meta.senha) {
+            $("lock-screen").style.display = "none";
+            $("report-content").style.opacity = "1";
+            $("main-body").style.overflow = "auto";
+        } else {
+            $("error-message").classList.remove("hidden");
+        }
+    }
+
+    renderAll();
+    </script>
+</body>
+</html>
