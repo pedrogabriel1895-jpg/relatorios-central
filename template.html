@@ -90,7 +90,14 @@
         <header class="fixed top-0 w-full z-50 glass-panel border-b border-white/5 bg-slate-950/80">
             <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
                 <div class="flex items-center gap-4">
-                    <div class="h-10 w-10 bg-blue-600 rounded-lg flex items-center justify-center font-black text-white" id="header-initials"></div>
+                   <a href="/relatorios-central/" class="block">
+    <img 
+        src="https://pedrogabriel1895-jpg.github.io/relatorios-central/logo-central.png" 
+        alt="Logo Central de Engajamento" 
+        class="h-10 w-auto"
+        style="max-width: 150px;" 
+    >
+</a>
                     <div class="hidden sm:block leading-tight">
                         <h1 id="header-title" class="text-sm font-bold text-white tracking-wide"></h1>
                         <p id="header-subtitle" class="text-[10px] text-slate-400 uppercase tracking-widest font-semibold"></p>
@@ -192,7 +199,6 @@
         document.title = D.meta.titulo;
         $("header-title").textContent = D.meta.titulo;
         $("header-subtitle").textContent = D.meta.periodo;
-        $("header-initials").textContent = D.meta.projeto;
         $("footer-texto").textContent = `Gerado em: ${new Date(D.meta.gerado_em).toLocaleString()} | Projeto ${D.meta.projeto}`;
 
         $("objetivo-texto").textContent = D.qualitativo.objetivo;
