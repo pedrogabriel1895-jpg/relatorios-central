@@ -59,6 +59,22 @@
             display: flex; align-items: center; justify-content: center;
             backdrop-filter: blur(20px);
         }
+        /* Efeito de Glow dinâmico para os cards */
+        .kpi-card {
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .glow-blue { box-shadow: 0 0 20px rgba(59, 130, 246, 0.15); }
+        .glow-emerald { box-shadow: 0 0 20px rgba(16, 185, 129, 0.15); }
+        .glow-yellow { box-shadow: 0 0 20px rgba(234, 179, 8, 0.15); }
+
+        /* O pulo do gato: Apaga o glow e realça a borda no hover */
+        .kpi-card:hover {
+        box-shadow: none !important;
+        transform: translateY(-4px);
+        border-color: rgba(255, 255, 255, 0.3);
+        background: rgba(30, 41, 59, 0.5);
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col antialiased" id="main-body">
@@ -220,12 +236,17 @@
             { label: "Engajados (Última Missão)", valor: totalEngajados, cor: "emerald" },
             { label: "Missões no Período", valor: D.quantitativo.missoes.length, cor: "yellow" }
         ];
-        $("kpi-cards").innerHTML = kpis.map(k => `
-            <div class="glass-panel p-6 rounded-2xl border-l-4 ${k.cor === 'blue' ? 'border-blue-500' : k.cor === 'emerald' ? 'border-emerald-500' : 'border-yellow-500'}">
-                <p class="text-xs text-slate-400 uppercase font-bold mb-1">${k.label}</p>
-                <span class="text-3xl font-black text-white">${k.valor}</span>
-            </div>
-        `).join("");
+        $("kpi-cards").innerHTML = kpis.map(k => {
+            const borderCor = k.cor === 'blue' ? 'border-blue-500' : k.cor === 'emerald' ? 'border-emerald-500' : 'border-yellow-500';
+            const glowCor = `glow-${k.cor}`; // Classe que criamos no CSS
+
+            return `
+                <div class="glass-panel kpi-card ${glowCor} p-6 rounded-2xl border-l-4 ${borderCor} cursor-default transition-all duration-300">
+                    <p class="text-xs text-slate-400 uppercase font-bold mb-1">${k.label}</p>
+                    <span class="text-3xl font-black text-white">${k.valor}</span>
+                </div>
+            `;
+        }).join("");
 
         const barContainer = $("bar-chart-container");
         barContainer.style.gridTemplateColumns = `repeat(${D.quantitativo.missoes.length}, minmax(0, 1fr))`;
