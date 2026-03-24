@@ -14,7 +14,6 @@
             font-family: 'Inter', sans-serif;
             background-color: #020617;
             color: #f1f5f9;
-            /* REMOVIDO: overflow-hidden e h-screen para permitir scroll */
             background-image: 
                 radial-gradient(at top left, rgba(59, 130, 246, 0.05), transparent 60%),
                 radial-gradient(at bottom right, rgba(16, 185, 129, 0.05), transparent 60%);
@@ -25,56 +24,43 @@
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2), 0 2px 4px -1px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
+
+        /* EFEITO DE GLOW DINÂMICO PARA TODOS OS BLOCOS */
+        .glow-blue { box-shadow: 0 0 20px rgba(59, 130, 246, 0.12); }
+        .glow-emerald { box-shadow: 0 0 20px rgba(16, 185, 129, 0.12); }
+        .glow-yellow { box-shadow: 0 0 20px rgba(234, 179, 8, 0.12); }
+        .glow-red { box-shadow: 0 0 20px rgba(239, 68, 68, 0.12); }
+
+        /* Mata o glow e realça no hover */
+        .glass-panel:hover {
+            box-shadow: none !important;
+            transform: translateY(-4px);
+            border-color: rgba(255, 255, 255, 0.2);
+            background: rgba(30, 41, 59, 0.5);
+        }
+
         @keyframes slideUp {
             from { opacity: 0; transform: translateY(20px); }
             to   { opacity: 1; transform: translateY(0); }
         }
-        @keyframes growBar { from { height: 0; } }
-        .animate-slide-up { animation: slideUp 0.8s cubic-bezier(0.16,1,0.3,1) forwards; }
-        
-        /* AJUSTE: Abas com altura mínima para garantir visibilidade */
         .tab-content { display: none; width: 100%; min-height: 400px; padding-bottom: 50px; }
         .tab-content.active { display: block; animation: slideUp 0.5s ease-out; }
         
         .nav-btn { position: relative; padding-bottom: 2px; color: #94a3b8; transition: all 0.3s; }
         .nav-btn.active { color: #ffffff; font-weight: 600; }
         .nav-btn.active::after {
-            content: '';
-            position: absolute; bottom: -4px; left: 0;
+            content: ''; position: absolute; bottom: -4px; left: 0;
             width: 100%; height: 2px;
             background: linear-gradient(90deg, #3b82f6, #10b981);
             border-radius: 2px;
         }
-        .custom-table th {
-            text-transform: uppercase; font-size: 0.7rem; color: #94a3b8;
-            padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
+        .custom-table th { text-transform: uppercase; font-size: 0.7rem; color: #94a3b8; padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .custom-table td { padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.85rem; }
         
-        #lock-screen {
-            position: fixed; inset: 0; z-index: 9999;
-            background-color: #020617;
-            display: flex; align-items: center; justify-content: center;
-            backdrop-filter: blur(20px);
-        }
-        /* Efeito de Glow dinâmico para os cards */
-        .kpi-card {
-        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .glow-blue { box-shadow: 0 0 20px rgba(59, 130, 246, 0.15); }
-        .glow-emerald { box-shadow: 0 0 20px rgba(16, 185, 129, 0.15); }
-        .glow-yellow { box-shadow: 0 0 20px rgba(234, 179, 8, 0.15); }
-
-        /* O pulo do gato: Apaga o glow e realça a borda no hover */
-        .kpi-card:hover {
-        box-shadow: none !important;
-        transform: translateY(-4px);
-        border-color: rgba(255, 255, 255, 0.3);
-        background: rgba(30, 41, 59, 0.5);
-        }
+        #lock-screen { position: fixed; inset: 0; z-index: 9999; background-color: #020617; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(20px); }
     </style>
 </head>
 <body class="min-h-screen flex flex-col antialiased" id="main-body">
@@ -106,15 +92,10 @@
         <header class="fixed top-0 w-full z-50 glass-panel border-b border-white/5 bg-slate-950/80">
             <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
                 <div class="flex items-center gap-4">
-                   <a href="/relatorios-central/" class="block">
-    <img 
-        src="https://pedrogabriel1895-jpg.github.io/relatorios-central/logo-central.png" 
-        alt="Logo Central de Engajamento" 
-        class="h-10 w-auto"
-        style="max-width: 150px;" 
-    >
-</a>
-                    <div class="hidden sm:block leading-tight">
+                    <a href="/relatorios-central/" class="block">
+                        <img src="https://pedrogabriel1895-jpg.github.io/relatorios-central/logo-central.png" alt="Logo Central" class="h-10 w-auto" style="max-width: 150px;">
+                    </a>
+                    <div class="hidden sm:block leading-tight border-l border-white/10 pl-4 ml-2">
                         <h1 id="header-title" class="text-sm font-bold text-white tracking-wide"></h1>
                         <p id="header-subtitle" class="text-[10px] text-slate-400 uppercase tracking-widest font-semibold"></p>
                     </div>
@@ -132,7 +113,7 @@
             <div id="tab-visao-geral" class="tab-content active space-y-12">
                 <div class="grid md:grid-cols-3 gap-6 animate-slide-up" id="kpi-cards"></div>
 
-                <div class="glass-panel p-8 rounded-3xl animate-slide-up relative overflow-hidden">
+                <div class="glass-panel glow-blue p-8 rounded-3xl animate-slide-up relative overflow-hidden">
                     <div class="relative z-10 space-y-6">
                         <div>
                             <h3 class="text-2xl font-bold text-white mb-2 flex items-center gap-2">
@@ -144,30 +125,29 @@
                             <h4 class="text-blue-400 font-bold uppercase text-xs mb-2 flex items-center gap-2">
                                 <i data-lucide="trending-up"></i> Análise Executiva
                             </h4>
-                            <p id="analise-executiva" class="text-slate-300 text-sm italic"></p>
+                            <p id="analise-executiva" class="text-slate-300 text-sm italic whitespace-pre-line"></p>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div id="tab-missoes" class="tab-content space-y-10">
-                <div class="glass-panel p-8 rounded-3xl animate-slide-up">
+                <div class="glass-panel glow-blue p-8 rounded-3xl animate-slide-up">
                     <h3 class="text-xl font-bold text-white mb-6">Adesão por Missão</h3>
                     <div class="grid gap-4 h-64 items-end pb-2 border-b border-slate-800" id="bar-chart-container"></div>
                 </div>
-
                 <div id="rankings-container" class="space-y-8"></div>
             </div>
 
             <div id="tab-diagnostico" class="tab-content space-y-12">
                 <div class="grid md:grid-cols-2 gap-8">
-                    <div class="glass-panel p-8 rounded-3xl border-l-4 border-yellow-500">
+                    <div class="glass-panel glow-yellow p-8 rounded-3xl border-l-4 border-yellow-500">
                         <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
                             <i data-lucide="lightbulb" class="text-yellow-400"></i> Insights Consolidados
                         </h3>
                         <p id="insights-texto" class="text-slate-300 text-sm leading-relaxed"></p>
                     </div>
-                    <div class="glass-panel p-8 rounded-3xl border-l-4 border-red-500">
+                    <div class="glass-panel glow-red p-8 rounded-3xl border-l-4 border-red-500">
                         <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
                             <i data-lucide="alert-triangle" class="text-red-400"></i> Pontos de Atenção
                         </h3>
@@ -175,30 +155,39 @@
                     </div>
                 </div>
 
-                <div class="glass-panel p-8 rounded-3xl border-t-4 border-green-500">
-                    <h3 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
-                        <i data-lucide="zap" class="text-green-400"></i> Plano de Ataque & Mitigação
-                    </h3>
-                    <div class="grid md:grid-cols-2 gap-8">
-                        <div>
-                            <h4 class="text-xs font-black text-slate-500 uppercase mb-3">Próximos Passos</h4>
-                            <p id="plano-texto" class="text-slate-300 text-sm whitespace-pre-line"></p>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="md:col-span-2 glass-panel glow-emerald p-8 rounded-3xl border-t-4 border-green-500">
+                        <h3 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                            <i data-lucide="zap" class="text-green-400"></i> Plano de Ataque & Mitigação
+                        </h3>
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <div>
+                                <h4 class="text-xs font-black text-slate-500 uppercase mb-3">Próximos Passos</h4>
+                                <p id="plano-texto" class="text-slate-300 text-sm whitespace-pre-line"></p>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-black text-slate-500 uppercase mb-3">Ações de Mitigação</h4>
+                                <p id="mitigacao-texto" class="text-slate-300 text-sm whitespace-pre-line"></p>
+                            </div>
                         </div>
-                        <div>
-                            <h4 class="text-xs font-black text-slate-500 uppercase mb-3">Ações de Mitigação</h4>
-                            <p id="mitigacao-texto" class="text-slate-300 text-sm whitespace-pre-line"></p>
-                        </div>
+                    </div>
+                    
+                    <div class="glass-panel glow-blue p-8 rounded-3xl border-l-4 border-blue-500">
+                        <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                            <i data-lucide="calendar" class="text-blue-400"></i> Linha do Tempo
+                        </h3>
+                        <p id="linha-tempo-texto" class="text-slate-300 text-xs leading-relaxed whitespace-pre-line"></p>
                     </div>
                 </div>
 
                 <div id="evidencia-container" class="hidden">
                     <h3 class="text-xl font-bold text-white mb-6">Evidência de Destaque</h3>
-                    <img id="evidencia-img" src="" class="rounded-2xl border border-white/10 w-full max-w-2xl mx-auto">
+                    <img id="evidencia-img" src="" class="rounded-2xl border border-white/10 w-full max-w-2xl mx-auto shadow-2xl">
                 </div>
             </div>
         </main>
 
-        <footer class="border-t border-slate-800 bg-slate-950/90 py-8 text-center">
+        <footer class="border-t border-white/5 bg-slate-950/90 py-8 text-center">
             <p id="footer-texto" class="text-slate-600 text-[10px] uppercase tracking-widest"></p>
         </footer>
     </div>
@@ -218,11 +207,12 @@
         $("footer-texto").textContent = `Gerado em: ${new Date(D.meta.gerado_em).toLocaleString()} | Projeto ${D.meta.projeto}`;
 
         $("objetivo-texto").textContent = D.qualitativo.objetivo;
-        $("analise-executiva").textContent = D.qualitativo.analise_executiva;
+        $("analise-executiva").textContent = D.qualitativo.analise_executiva; // FIX: AGORA APARECE
         $("insights-texto").textContent = D.qualitativo.insights;
         $("atencao-texto").textContent = D.qualitativo.pontos_atencao;
         $("plano-texto").textContent = D.qualitativo.plano_ataque;
         $("mitigacao-texto").textContent = D.qualitativo.mitigacao;
+        $("linha-tempo-texto").textContent = D.qualitativo.linha_tempo; // FIX: AGORA APARECE
         
         if(D.qualitativo.evidencia_url) {
             $("evidencia-container").classList.remove("hidden");
@@ -236,12 +226,12 @@
             { label: "Engajados (Última Missão)", valor: totalEngajados, cor: "emerald" },
             { label: "Missões no Período", valor: D.quantitativo.missoes.length, cor: "yellow" }
         ];
+
         $("kpi-cards").innerHTML = kpis.map(k => {
             const borderCor = k.cor === 'blue' ? 'border-blue-500' : k.cor === 'emerald' ? 'border-emerald-500' : 'border-yellow-500';
-            const glowCor = `glow-${k.cor}`; // Classe que criamos no CSS
-
+            const glowCor = `glow-${k.cor}`;
             return `
-                <div class="glass-panel kpi-card ${glowCor} p-6 rounded-2xl border-l-4 ${borderCor} cursor-default transition-all duration-300">
+                <div class="glass-panel ${glowCor} p-6 rounded-2xl border-l-4 ${borderCor} cursor-default">
                     <p class="text-xs text-slate-400 uppercase font-bold mb-1">${k.label}</p>
                     <span class="text-3xl font-black text-white">${k.valor}</span>
                 </div>
@@ -250,7 +240,6 @@
 
         const barContainer = $("bar-chart-container");
         barContainer.style.gridTemplateColumns = `repeat(${D.quantitativo.missoes.length}, minmax(0, 1fr))`;
-        
         barContainer.innerHTML = D.quantitativo.missoes.map((m, i) => {
             const mediaEngajamento = m.ranking.reduce((acc, curr) => acc + curr.percentualEngajamento, 0) / m.ranking.length;
             return `
@@ -263,20 +252,13 @@
         }).join("");
 
         $("rankings-container").innerHTML = D.quantitativo.missoes.map(m => `
-            <div class="glass-panel rounded-3xl overflow-hidden">
+            <div class="glass-panel glow-blue rounded-3xl overflow-hidden">
                 <div class="p-6 bg-slate-900/50 border-b border-slate-800">
                     <h4 class="font-bold text-white italic">Ranking: ${m.nome_missao}</h4>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full custom-table">
-                        <thead>
-                            <tr>
-                                <th>Grupo</th>
-                                <th class="text-center">Base</th>
-                                <th class="text-center">Ativos</th>
-                                <th class="text-right">%</th>
-                            </tr>
-                        </thead>
+                        <thead><tr><th>Grupo</th><th class="text-center">Base</th><th class="text-center">Ativos</th><th class="text-right">%</th></tr></thead>
                         <tbody>
                             ${m.ranking.map(r => `
                                 <tr class="hover:bg-white/5">
@@ -284,13 +266,11 @@
                                     <td class="text-center text-slate-400">${r.baseTotal}</td>
                                     <td class="text-center text-slate-300">${r.engajados}</td>
                                     <td class="text-right font-black ${r.percentualEngajamento > 50 ? 'text-green-400' : 'text-yellow-500'}">${r.percentualEngajamento}%</td>
-                                </tr>
-                            `).join("")}
+                                </tr>`).join("")}
                         </tbody>
                     </table>
                 </div>
-            </div>
-        `).join("");
+            </div>`).join("");
 
         lucide.createIcons();
     }
@@ -300,7 +280,6 @@
         if (input.value === REPORT_DATA.meta.senha) {
             $("lock-screen").style.display = "none";
             $("report-content").style.opacity = "1";
-            // AGORA O SCROLL É LIBERADO AQUI
             document.body.style.overflow = "auto";
         } else {
             $("error-message").classList.remove("hidden");
@@ -312,7 +291,6 @@
         document.querySelectorAll(".nav-btn").forEach(el => el.classList.remove("active"));
         $("tab-" + name).classList.add("active");
         $("btn-" + name).classList.add("active");
-        // Scroll para o topo ao trocar de aba para facilitar a leitura
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
