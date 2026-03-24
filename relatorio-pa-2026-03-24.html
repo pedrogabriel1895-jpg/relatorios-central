@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">Carregando Relatório...</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #020617;
+            color: #f1f5f9;
+            /* REMOVIDO: overflow-hidden e h-screen para permitir scroll */
+            background-image: 
+                radial-gradient(at top left, rgba(59, 130, 246, 0.05), transparent 60%),
+                radial-gradient(at bottom right, rgba(16, 185, 129, 0.05), transparent 60%);
+            background-attachment: fixed;
+        }
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2), 0 2px 4px -1px rgba(0,0,0,0.1);
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes growBar { from { height: 0; } }
+        .animate-slide-up { animation: slideUp 0.8s cubic-bezier(0.16,1,0.3,1) forwards; }
+        
+        /* AJUSTE: Abas com altura mínima para garantir visibilidade */
+        .tab-content { display: none; width: 100%; min-height: 400px; padding-bottom: 50px; }
+        .tab-content.active { display: block; animation: slideUp 0.5s ease-out; }
+        
+        .nav-btn { position: relative; padding-bottom: 2px; color: #94a3b8; transition: all 0.3s; }
+        .nav-btn.active { color: #ffffff; font-weight: 600; }
+        .nav-btn.active::after {
+            content: '';
+            position: absolute; bottom: -4px; left: 0;
+            width: 100%; height: 2px;
+            background: linear-gradient(90deg, #3b82f6, #10b981);
+            border-radius: 2px;
+        }
+        .custom-table th {
+            text-transform: uppercase; font-size: 0.7rem; color: #94a3b8;
+            padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .custom-table td { padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.85rem; }
+        
+        #lock-screen {
+            position: fixed; inset: 0; z-index: 9999;
+            background-color: #020617;
+            display: flex; align-items: center; justify-content: center;
+            backdrop-filter: blur(20px);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased" id="main-body">
+
+    <div id="lock-screen">
+        <div class="glass-panel p-8 rounded-2xl w-full max-w-md border border-slate-700 shadow-2xl text-center">
+            <div class="mb-6 flex justify-center">
+                <div class="w-16 h-16 bg-blue-600/20 rounded-2xl flex items-center justify-center border border-blue-500/30">
+                    <i data-lucide="lock" class="w-8 h-8 text-blue-400"></i>
+                </div>
+            </div>
+            <h2 class="text-2xl font-bold text-white mb-2">Acesso Restrito</h2>
+            <p class="text-slate-400 text-sm mb-8" id="lock-subtitle">Relatório Estratégico</p>
+            <form onsubmit="event.preventDefault(); checkPassword();" class="space-y-4">
+                <input type="password" id="password-input"
+                    class="w-full bg-slate-900/80 border border-slate-700 text-white text-center text-lg rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all text-black"
+                    placeholder="Digite a senha" autofocus>
+                <button type="submit"
+                    class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl transition-all shadow-lg active:scale-95">
+                    Acessar Relatório
+                </button>
+            </form>
+            <p id="error-message" class="text-red-400 text-xs mt-4 font-medium hidden">Senha incorreta.</p>
+        </div>
+    </div>
+
+    <div id="report-content" class="transition-all duration-700 opacity-0 flex flex-col min-h-screen">
+
+        <header class="fixed top-0 w-full z-50 glass-panel border-b border-white/5 bg-slate-950/80">
+            <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                   <a href="/relatorios-central/" class="block">
+    <img 
+        src="https://pedrogabriel1895-jpg.github.io/relatorios-central/logo-central.png" 
+        alt="Logo Central de Engajamento" 
+        class="h-10 w-auto"
+        style="max-width: 150px;" 
+    >
+</a>
+                    <div class="hidden sm:block leading-tight">
+                        <h1 id="header-title" class="text-sm font-bold text-white tracking-wide"></h1>
+                        <p id="header-subtitle" class="text-[10px] text-slate-400 uppercase tracking-widest font-semibold"></p>
+                    </div>
+                </div>
+                <nav class="hidden md:flex gap-8 text-sm">
+                    <button onclick="switchTab('visao-geral')" id="btn-visao-geral" class="nav-btn active">Visão Geral & Objetivo</button>
+                    <button onclick="switchTab('missoes')" id="btn-missoes" class="nav-btn">Rankings & Missões</button>
+                    <button onclick="switchTab('diagnostico')" id="btn-diagnostico" class="nav-btn">Estratégia & Ações</button>
+                </nav>
+            </div>
+        </header>
+
+        <main class="flex-grow pt-28 pb-12 px-4 sm:px-6 max-w-7xl mx-auto w-full">
+
+            <div id="tab-visao-geral" class="tab-content active space-y-12">
+                <div class="grid md:grid-cols-3 gap-6 animate-slide-up" id="kpi-cards"></div>
+
+                <div class="glass-panel p-8 rounded-3xl animate-slide-up relative overflow-hidden">
+                    <div class="relative z-10 space-y-6">
+                        <div>
+                            <h3 class="text-2xl font-bold text-white mb-2 flex items-center gap-2">
+                                <i data-lucide="target" class="text-blue-400"></i> Objetivo Estratégico
+                            </h3>
+                            <p id="objetivo-texto" class="text-slate-300 leading-relaxed text-lg"></p>
+                        </div>
+                        <div class="bg-blue-900/20 p-6 rounded-2xl border border-blue-500/20">
+                            <h4 class="text-blue-400 font-bold uppercase text-xs mb-2 flex items-center gap-2">
+                                <i data-lucide="trending-up"></i> Análise Executiva
+                            </h4>
+                            <p id="analise-executiva" class="text-slate-300 text-sm italic"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-missoes" class="tab-content space-y-10">
+                <div class="glass-panel p-8 rounded-3xl animate-slide-up">
+                    <h3 class="text-xl font-bold text-white mb-6">Adesão por Missão</h3>
+                    <div class="grid gap-4 h-64 items-end pb-2 border-b border-slate-800" id="bar-chart-container"></div>
+                </div>
+
+                <div id="rankings-container" class="space-y-8"></div>
+            </div>
+
+            <div id="tab-diagnostico" class="tab-content space-y-12">
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="glass-panel p-8 rounded-3xl border-l-4 border-yellow-500">
+                        <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                            <i data-lucide="lightbulb" class="text-yellow-400"></i> Insights Consolidados
+                        </h3>
+                        <p id="insights-texto" class="text-slate-300 text-sm leading-relaxed"></p>
+                    </div>
+                    <div class="glass-panel p-8 rounded-3xl border-l-4 border-red-500">
+                        <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                            <i data-lucide="alert-triangle" class="text-red-400"></i> Pontos de Atenção
+                        </h3>
+                        <p id="atencao-texto" class="text-slate-300 text-sm leading-relaxed"></p>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-8 rounded-3xl border-t-4 border-green-500">
+                    <h3 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                        <i data-lucide="zap" class="text-green-400"></i> Plano de Ataque & Mitigação
+                    </h3>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <h4 class="text-xs font-black text-slate-500 uppercase mb-3">Próximos Passos</h4>
+                            <p id="plano-texto" class="text-slate-300 text-sm whitespace-pre-line"></p>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-black text-slate-500 uppercase mb-3">Ações de Mitigação</h4>
+                            <p id="mitigacao-texto" class="text-slate-300 text-sm whitespace-pre-line"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="evidencia-container" class="hidden">
+                    <h3 class="text-xl font-bold text-white mb-6">Evidência de Destaque</h3>
+                    <img id="evidencia-img" src="" class="rounded-2xl border border-white/10 w-full max-w-2xl mx-auto">
+                </div>
+            </div>
+        </main>
+
+        <footer class="border-t border-slate-800 bg-slate-950/90 py-8 text-center">
+            <p id="footer-texto" class="text-slate-600 text-[10px] uppercase tracking-widest"></p>
+        </footer>
+    </div>
+
+    <script>
+    const REPORT_DATA = {"meta":{"projeto":"PA","periodo":"2026-03-12 a 2026-03-13","gerado_em":"2026-03-24T17:45:59.138Z","titulo":"Relatório de Inteligência - PA","senha":"123"},"qualitativo":{"objetivo":"Ampliar a capilaridade das missões nas regiões do Baixo Amazonas e Marajó, focando em temas de infraestrutura local.","analise_executiva":"O objetivo foi atingido parcialmente. Tivemos um crescimento de 12% no engajamento total, porém a velocidade de resposta nas capitais focais ainda está abaixo da meta estabelecida.","insights":"Notamos que os mobilizadores respondem 3x mais rápido a conteúdos em formato de áudio curto do que a textos longos de orientação","pontos_atencao":"Identificamos uma queda de engajamento em Santarém. Possível fadiga da base devido à frequência alta de missões políticas na última semana.","linha_tempo":"02/03: Reunião de alinhamento com Pontos Focais.\n\n04/03: Disparo da Missão \"Transparência Total\".\n\n06/03: Saneamento da base de inativos.","plano_ataque":"Lançar 2 missões em formato de vídeo/áudio.\n\nRealizar call de urgência com líderes de Santarém.\n\nBonificar os 5 mobilizadores mais ativos do mês.","mitigacao":"Vamos pausar as missões genéricas por 48h para reduzir o churn (saída) de membros nos grupos de WhatsApp.","evidencia_url":"https://storage.tally.so/private/Gemini_Generated_Image_mnsdi8mnsdi8mnsd.png?id=pv1XjJ&accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InB2MVhqSiIsImZvcm1JZCI6Iko5MHhiNCIsImlhdCI6MTc3NDAyODk4MX0.GRBt1MADxErVJ1tliMIqliDbs-gbIXsYtzht6wexto0&signature=cbfaab892cda69336242e86d09efa561c6c39266c5c74036df25beb03f078b4a"},"quantitativo":{"missoes":[{"id_missao":"a0b8ffae-6dfe-426b-81ad-34d73bd1e5d8","nome_missao":"13-03-missao1","ranking":[{"grupo":"SEDEME","baseTotal":8,"engajados":8,"percentualEngajamento":100},{"grupo":"IASEP","baseTotal":22,"engajados":17,"percentualEngajamento":77.27},{"grupo":"DETRAN","baseTotal":32,"engajados":24,"percentualEngajamento":75},{"grupo":"HEMOPA","baseTotal":35,"engajados":23,"percentualEngajamento":65.71},{"grupo":"SECOM","baseTotal":59,"engajados":26,"percentualEngajamento":44.07},{"grupo":"PARAPAZ","baseTotal":65,"engajados":26,"percentualEngajamento":40},{"grupo":"FAPESPA","baseTotal":45,"engajados":15,"percentualEngajamento":33.33},{"grupo":"SEPLAD","baseTotal":128,"engajados":40,"percentualEngajamento":31.25},{"grupo":"SEFA","baseTotal":28,"engajados":8,"percentualEngajamento":28.57},{"grupo":"SEMAS","baseTotal":45,"engajados":10,"percentualEngajamento":22.22},{"grupo":"CONSANPA","baseTotal":85,"engajados":18,"percentualEngajamento":21.18},{"grupo":"SEGUP","baseTotal":21,"engajados":4,"percentualEngajamento":19.05},{"grupo":"PRODEPA","baseTotal":24,"engajados":4,"percentualEngajamento":16.67},{"grupo":"SEOP","baseTotal":160,"engajados":25,"percentualEngajamento":15.63},{"grupo":"ADEPARA","baseTotal":16,"engajados":2,"percentualEngajamento":12.5},{"grupo":"SEAC","baseTotal":33,"engajados":4,"percentualEngajamento":12.12},{"grupo":"BANPARA","baseTotal":22,"engajados":2,"percentualEngajamento":9.09},{"grupo":"ITERPA","baseTotal":25,"engajados":2,"percentualEngajamento":8},{"grupo":"SETUR","baseTotal":18,"engajados":1,"percentualEngajamento":5.56},{"grupo":"SESPA","baseTotal":18,"engajados":1,"percentualEngajamento":5.56},{"grupo":"SEDUC","baseTotal":45,"engajados":2,"percentualEngajamento":4.44},{"grupo":"ARCON","baseTotal":13,"engajados":0,"percentualEngajamento":0}]},{"id_missao":"1569b6c8-3d2b-496f-8adf-a3309beb71f9","nome_missao":"missao3","ranking":[{"grupo":"DETRAN","baseTotal":32,"engajados":28,"percentualEngajamento":87.5},{"grupo":"IASEP","baseTotal":22,"engajados":17,"percentualEngajamento":77.27},{"grupo":"SEDEME","baseTotal":8,"engajados":6,"percentualEngajamento":75},{"grupo":"HEMOPA","baseTotal":35,"engajados":26,"percentualEngajamento":74.29},{"grupo":"SECOM","baseTotal":59,"engajados":34,"percentualEngajamento":57.63},{"grupo":"SEFA","baseTotal":28,"engajados":9,"percentualEngajamento":32.14},{"grupo":"SEMAS","baseTotal":45,"engajados":14,"percentualEngajamento":31.11},{"grupo":"FAPESPA","baseTotal":45,"engajados":13,"percentualEngajamento":28.89},{"grupo":"SEPLAD","baseTotal":128,"engajados":32,"percentualEngajamento":25},{"grupo":"SEGUP","baseTotal":21,"engajados":5,"percentualEngajamento":23.81},{"grupo":"PARAPAZ","baseTotal":65,"engajados":15,"percentualEngajamento":23.08},{"grupo":"PRODEPA","baseTotal":24,"engajados":4,"percentualEngajamento":16.67},{"grupo":"CONSANPA","baseTotal":85,"engajados":12,"percentualEngajamento":14.12},{"grupo":"BANPARA","baseTotal":22,"engajados":3,"percentualEngajamento":13.64},{"grupo":"SEOP","baseTotal":160,"engajados":19,"percentualEngajamento":11.88},{"grupo":"ARCON","baseTotal":13,"engajados":1,"percentualEngajamento":7.69},{"grupo":"SEAC","baseTotal":33,"engajados":2,"percentualEngajamento":6.06},{"grupo":"SEDUC","baseTotal":45,"engajados":2,"percentualEngajamento":4.44},{"grupo":"SETUR","baseTotal":18,"engajados":0,"percentualEngajamento":0},{"grupo":"SESPA","baseTotal":18,"engajados":0,"percentualEngajamento":0},{"grupo":"ADEPARA","baseTotal":16,"engajados":0,"percentualEngajamento":0},{"grupo":"ITERPA","baseTotal":25,"engajados":0,"percentualEngajamento":0}]},{"id_missao":"01691bb3-95be-4f9c-b26e-65234c1c893b","nome_missao":"12-03-engaja-02-a","ranking":[{"grupo":"SEDEME","baseTotal":8,"engajados":8,"percentualEngajamento":100},{"grupo":"IASEP","baseTotal":22,"engajados":15,"percentualEngajamento":68.18},{"grupo":"DETRAN","baseTotal":32,"engajados":18,"percentualEngajamento":56.25},{"grupo":"HEMOPA","baseTotal":35,"engajados":18,"percentualEngajamento":51.43},{"grupo":"PARAPAZ","baseTotal":65,"engajados":27,"percentualEngajamento":41.54},{"grupo":"SECOM","baseTotal":59,"engajados":23,"percentualEngajamento":38.98},{"grupo":"FAPESPA","baseTotal":45,"engajados":14,"percentualEngajamento":31.11},{"grupo":"SEPLAD","baseTotal":128,"engajados":36,"percentualEngajamento":28.13},{"grupo":"SEMAS","baseTotal":45,"engajados":12,"percentualEngajamento":26.67},{"grupo":"SEGUP","baseTotal":21,"engajados":4,"percentualEngajamento":19.05},{"grupo":"SEFA","baseTotal":28,"engajados":5,"percentualEngajamento":17.86},{"grupo":"CONSANPA","baseTotal":85,"engajados":13,"percentualEngajamento":15.29},{"grupo":"PRODEPA","baseTotal":24,"engajados":3,"percentualEngajamento":12.5},{"grupo":"SEOP","baseTotal":160,"engajados":17,"percentualEngajamento":10.63},{"grupo":"SEAC","baseTotal":33,"engajados":3,"percentualEngajamento":9.09},{"grupo":"SEDUC","baseTotal":45,"engajados":4,"percentualEngajamento":8.89},{"grupo":"SETUR","baseTotal":18,"engajados":1,"percentualEngajamento":5.56},{"grupo":"BANPARA","baseTotal":22,"engajados":1,"percentualEngajamento":4.55},{"grupo":"SESPA","baseTotal":18,"engajados":0,"percentualEngajamento":0},{"grupo":"ARCON","baseTotal":13,"engajados":0,"percentualEngajamento":0},{"grupo":"ADEPARA","baseTotal":16,"engajados":0,"percentualEngajamento":0},{"grupo":"ITERPA","baseTotal":25,"engajados":0,"percentualEngajamento":0}]},{"id_missao":"ab50f3d1-0bec-461b-9c06-9bc633e31c95","nome_missao":"12-03-engaja-08-a","ranking":[{"grupo":"IASEP","baseTotal":22,"engajados":0,"percentualEngajamento":0},{"grupo":"SEOP","baseTotal":160,"engajados":0,"percentualEngajamento":0},{"grupo":"SEPLAD","baseTotal":128,"engajados":0,"percentualEngajamento":0},{"grupo":"SEDUC","baseTotal":45,"engajados":0,"percentualEngajamento":0},{"grupo":"SEMAS","baseTotal":45,"engajados":0,"percentualEngajamento":0},{"grupo":"SEDEME","baseTotal":8,"engajados":0,"percentualEngajamento":0},{"grupo":"SEFA","baseTotal":28,"engajados":0,"percentualEngajamento":0},{"grupo":"SEAC","baseTotal":33,"engajados":0,"percentualEngajamento":0},{"grupo":"PARAPAZ","baseTotal":65,"engajados":0,"percentualEngajamento":0},{"grupo":"FAPESPA","baseTotal":45,"engajados":0,"percentualEngajamento":0},{"grupo":"HEMOPA","baseTotal":35,"engajados":0,"percentualEngajamento":0},{"grupo":"CONSANPA","baseTotal":85,"engajados":0,"percentualEngajamento":0},{"grupo":"SETUR","baseTotal":18,"engajados":0,"percentualEngajamento":0},{"grupo":"SESPA","baseTotal":18,"engajados":0,"percentualEngajamento":0},{"grupo":"ARCON","baseTotal":13,"engajados":0,"percentualEngajamento":0},{"grupo":"SECOM","baseTotal":59,"engajados":0,"percentualEngajamento":0},{"grupo":"SEGUP","baseTotal":21,"engajados":0,"percentualEngajamento":0},{"grupo":"ADEPARA","baseTotal":16,"engajados":0,"percentualEngajamento":0},{"grupo":"DETRAN","baseTotal":32,"engajados":0,"percentualEngajamento":0},{"grupo":"PRODEPA","baseTotal":24,"engajados":0,"percentualEngajamento":0},{"grupo":"ITERPA","baseTotal":25,"engajados":0,"percentualEngajamento":0},{"grupo":"BANPARA","baseTotal":22,"engajados":0,"percentualEngajamento":0}]},{"id_missao":"0351e75e-7a6e-46d6-88d3-746af79dcf0b","nome_missao":"12-03-engaja-07-a","ranking":[{"grupo":"IASEP","baseTotal":22,"engajados":19,"percentualEngajamento":86.36},{"grupo":"SEDEME","baseTotal":8,"engajados":6,"percentualEngajamento":75},{"grupo":"HEMOPA","baseTotal":35,"engajados":17,"percentualEngajamento":48.57},{"grupo":"DETRAN","baseTotal":32,"engajados":15,"percentualEngajamento":46.88},{"grupo":"PARAPAZ","baseTotal":65,"engajados":26,"percentualEngajamento":40},{"grupo":"FAPESPA","baseTotal":45,"engajados":15,"percentualEngajamento":33.33},{"grupo":"SEFA","baseTotal":28,"engajados":9,"percentualEngajamento":32.14},{"grupo":"SEMAS","baseTotal":45,"engajados":14,"percentualEngajamento":31.11},{"grupo":"SECOM","baseTotal":59,"engajados":17,"percentualEngajamento":28.81},{"grupo":"SEPLAD","baseTotal":128,"engajados":35,"percentualEngajamento":27.34},{"grupo":"CONSANPA","baseTotal":85,"engajados":13,"percentualEngajamento":15.29},{"grupo":"SEGUP","baseTotal":21,"engajados":3,"percentualEngajamento":14.29},{"grupo":"SEDUC","baseTotal":45,"engajados":6,"percentualEngajamento":13.33},{"grupo":"PRODEPA","baseTotal":24,"engajados":3,"percentualEngajamento":12.5},{"grupo":"SEAC","baseTotal":33,"engajados":4,"percentualEngajamento":12.12},{"grupo":"SEOP","baseTotal":160,"engajados":17,"percentualEngajamento":10.63},{"grupo":"SETUR","baseTotal":18,"engajados":1,"percentualEngajamento":5.56},{"grupo":"BANPARA","baseTotal":22,"engajados":1,"percentualEngajamento":4.55},{"grupo":"SESPA","baseTotal":18,"engajados":0,"percentualEngajamento":0},{"grupo":"ARCON","baseTotal":13,"engajados":0,"percentualEngajamento":0},{"grupo":"ADEPARA","baseTotal":16,"engajados":0,"percentualEngajamento":0},{"grupo":"ITERPA","baseTotal":25,"engajados":0,"percentualEngajamento":0}]},{"id_missao":"186ca76f-957d-4bef-8d44-e492904b4eaf","nome_missao":"12-03-engaja-05-a","ranking":[{"grupo":"IASEP","baseTotal":22,"engajados":16,"percentualEngajamento":72.73},{"grupo":"HEMOPA","baseTotal":35,"engajados":20,"percentualEngajamento":57.14},{"grupo":"SEDEME","baseTotal":8,"engajados":4,"percentualEngajamento":50},{"grupo":"DETRAN","baseTotal":32,"engajados":15,"percentualEngajamento":46.88},{"grupo":"FAPESPA","baseTotal":45,"engajados":12,"percentualEngajamento":26.67},{"grupo":"PARAPAZ","baseTotal":65,"engajados":17,"percentualEngajamento":26.15},{"grupo":"SECOM","baseTotal":59,"engajados":15,"percentualEngajamento":25.42},{"grupo":"SEPLAD","baseTotal":128,"engajados":29,"percentualEngajamento":22.66},{"grupo":"SEMAS","baseTotal":45,"engajados":10,"percentualEngajamento":22.22},{"grupo":"SEFA","baseTotal":28,"engajados":6,"percentualEngajamento":21.43},{"grupo":"SEDUC","baseTotal":45,"engajados":7,"percentualEngajamento":15.56},{"grupo":"SEGUP","baseTotal":21,"engajados":3,"percentualEngajamento":14.29},{"grupo":"PRODEPA","baseTotal":24,"engajados":2,"percentualEngajamento":8.33},{"grupo":"CONSANPA","baseTotal":85,"engajados":6,"percentualEngajamento":7.06},{"grupo":"SEOP","baseTotal":160,"engajados":10,"percentualEngajamento":6.25},{"grupo":"SEAC","baseTotal":33,"engajados":2,"percentualEngajamento":6.06},{"grupo":"SETUR","baseTotal":18,"engajados":0,"percentualEngajamento":0},{"grupo":"SESPA","baseTotal":18,"engajados":0,"percentualEngajamento":0},{"grupo":"ARCON","baseTotal":13,"engajados":0,"percentualEngajamento":0},{"grupo":"ADEPARA","baseTotal":16,"engajados":0,"percentualEngajamento":0},{"grupo":"ITERPA","baseTotal":25,"engajados":0,"percentualEngajamento":0},{"grupo":"BANPARA","baseTotal":22,"engajados":0,"percentualEngajamento":0}]},{"id_missao":"dbfc212a-af29-4628-aa84-4ea4984d12db","nome_missao":"12-03-engaja-06-a","ranking":[{"grupo":"SEDEME","baseTotal":8,"engajados":7,"percentualEngajamento":87.5},{"grupo":"IASEP","baseTotal":22,"engajados":17,"percentualEngajamento":77.27},{"grupo":"HEMOPA","baseTotal":35,"engajados":21,"percentualEngajamento":60},{"grupo":"DETRAN","baseTotal":32,"engajados":15,"percentualEngajamento":46.88},{"grupo":"PARAPAZ","baseTotal":65,"engajados":30,"percentualEngajamento":46.15},{"grupo":"SECOM","baseTotal":59,"engajados":23,"percentualEngajamento":38.98},{"grupo":"SEMAS","baseTotal":45,"engajados":14,"percentualEngajamento":31.11},{"grupo":"FAPESPA","baseTotal":45,"engajados":12,"percentualEngajamento":26.67},{"grupo":"SEPLAD","baseTotal":128,"engajados":28,"percentualEngajamento":21.88},{"grupo":"PRODEPA","baseTotal":24,"engajados":4,"percentualEngajamento":16.67},{"grupo":"ARCON","baseTotal":13,"engajados":2,"percentualEngajamento":15.38},{"grupo":"CONSANPA","baseTotal":85,"engajados":13,"percentualEngajamento":15.29},{"grupo":"SEFA","baseTotal":28,"engajados":3,"percentualEngajamento":10.71},{"grupo":"SEGUP","baseTotal":21,"engajados":2,"percentualEngajamento":9.52},{"grupo":"SEAC","baseTotal":33,"engajados":3,"percentualEngajamento":9.09},{"grupo":"SEDUC","baseTotal":45,"engajados":4,"percentualEngajamento":8.89},{"grupo":"SEOP","baseTotal":160,"engajados":13,"percentualEngajamento":8.13},{"grupo":"ADEPARA","baseTotal":16,"engajados":1,"percentualEngajamento":6.25},{"grupo":"SETUR","baseTotal":18,"engajados":1,"percentualEngajamento":5.56},{"grupo":"SESPA","baseTotal":18,"engajados":0,"percentualEngajamento":0},{"grupo":"ITERPA","baseTotal":25,"engajados":0,"percentualEngajamento":0},{"grupo":"BANPARA","baseTotal":22,"engajados":0,"percentualEngajamento":0}]},{"id_missao":"0841eee6-faef-4767-90e4-335d124e0af1","nome_missao":"12-03-engaja-03-a","ranking":[{"grupo":"SEDEME","baseTotal":8,"engajados":6,"percentualEngajamento":75},{"grupo":"IASEP","baseTotal":22,"engajados":16,"percentualEngajamento":72.73},{"grupo":"HEMOPA","baseTotal":35,"engajados":22,"percentualEngajamento":62.86},{"grupo":"DETRAN","baseTotal":32,"engajados":18,"percentualEngajamento":56.25},{"grupo":"PARAPAZ","baseTotal":65,"engajados":34,"percentualEngajamento":52.31},{"grupo":"SECOM","baseTotal":59,"engajados":20,"percentualEngajamento":33.9},{"grupo":"SEPLAD","baseTotal":128,"engajados":36,"percentualEngajamento":28.13},{"grupo":"SEFA","baseTotal":28,"engajados":7,"percentualEngajamento":25},{"grupo":"FAPESPA","baseTotal":45,"engajados":11,"percentualEngajamento":24.44},{"grupo":"SEMAS","baseTotal":45,"engajados":10,"percentualEngajamento":22.22},{"grupo":"SEGUP","baseTotal":21,"engajados":4,"percentualEngajamento":19.05},{"grupo":"SEAC","baseTotal":33,"engajados":5,"percentualEngajamento":15.15},{"grupo":"CONSANPA","baseTotal":85,"engajados":12,"percentualEngajamento":14.12},{"grupo":"SEOP","baseTotal":160,"engajados":19,"percentualEngajamento":11.88},{"grupo":"SEDUC","baseTotal":45,"engajados":5,"percentualEngajamento":11.11},{"grupo":"SETUR","baseTotal":18,"engajados":2,"percentualEngajamento":11.11},{"grupo":"BANPARA","baseTotal":22,"engajados":2,"percentualEngajamento":9.09},{"grupo":"PRODEPA","baseTotal":24,"engajados":2,"percentualEngajamento":8.33},{"grupo":"SESPA","baseTotal":18,"engajados":0,"percentualEngajamento":0},{"grupo":"ARCON","baseTotal":13,"engajados":0,"percentualEngajamento":0},{"grupo":"ADEPARA","baseTotal":16,"engajados":0,"percentualEngajamento":0},{"grupo":"ITERPA","baseTotal":25,"engajados":0,"percentualEngajamento":0}]},{"id_missao":"64616af6-4b4e-4d97-9a7e-bc5d3fc8f4bf","nome_missao":"13-03-engaja-02-a","ranking":[{"grupo":"SEDEME","baseTotal":8,"engajados":5,"percentualEngajamento":62.5},{"grupo":"IASEP","baseTotal":22,"engajados":13,"percentualEngajamento":59.09},{"grupo":"HEMOPA","baseTotal":35,"engajados":14,"percentualEngajamento":40},{"grupo":"PARAPAZ","baseTotal":65,"engajados":22,"percentualEngajamento":33.85},{"grupo":"DETRAN","baseTotal":32,"engajados":10,"percentualEngajamento":31.25},{"grupo":"SEMAS","baseTotal":45,"engajados":13,"percentualEngajamento":28.89},{"grupo":"FAPESPA","baseTotal":45,"engajados":9,"percentualEngajamento":20},{"grupo":"SEPLAD","baseTotal":128,"engajados":23,"percentualEngajamento":17.97},{"grupo":"SECOM","baseTotal":59,"engajados":10,"percentualEngajamento":16.95},{"grupo":"PRODEPA","baseTotal":24,"engajados":3,"percentualEngajamento":12.5},{"grupo":"CONSANPA","baseTotal":85,"engajados":10,"percentualEngajamento":11.76},{"grupo":"SETUR","baseTotal":18,"engajados":2,"percentualEngajamento":11.11},{"grupo":"SEFA","baseTotal":28,"engajados":3,"percentualEngajamento":10.71},{"grupo":"SEGUP","baseTotal":21,"engajados":2,"percentualEngajamento":9.52},{"grupo":"SEDUC","baseTotal":45,"engajados":4,"percentualEngajamento":8.89},{"grupo":"ARCON","baseTotal":13,"engajados":1,"percentualEngajamento":7.69},{"grupo":"ADEPARA","baseTotal":16,"engajados":1,"percentualEngajamento":6.25},{"grupo":"SEOP","baseTotal":160,"engajados":7,"percentualEngajamento":4.38},{"grupo":"SEAC","baseTotal":33,"engajados":1,"percentualEngajamento":3.03},{"grupo":"SESPA","baseTotal":18,"engajados":0,"percentualEngajamento":0},{"grupo":"ITERPA","baseTotal":25,"engajados":0,"percentualEngajamento":0},{"grupo":"BANPARA","baseTotal":22,"engajados":0,"percentualEngajamento":0}]},{"id_missao":"703a9cb7-beb1-42c5-aa73-a99b90dfdb08","nome_missao":"13-03-engaja-03-a","ranking":[{"grupo":"IASEP","baseTotal":22,"engajados":17,"percentualEngajamento":77.27},{"grupo":"SEDEME","baseTotal":8,"engajados":4,"percentualEngajamento":50},{"grupo":"PARAPAZ","baseTotal":65,"engajados":19,"percentualEngajamento":29.23},{"grupo":"DETRAN","baseTotal":32,"engajados":7,"percentualEngajamento":21.88},{"grupo":"HEMOPA","baseTotal":35,"engajados":7,"percentualEngajamento":20},{"grupo":"FAPESPA","baseTotal":45,"engajados":8,"percentualEngajamento":17.78},{"grupo":"SECOM","baseTotal":59,"engajados":10,"percentualEngajamento":16.95},{"grupo":"PRODEPA","baseTotal":24,"engajados":4,"percentualEngajamento":16.67},{"grupo":"SEFA","baseTotal":28,"engajados":3,"percentualEngajamento":10.71},{"grupo":"SEPLAD","baseTotal":128,"engajados":13,"percentualEngajamento":10.16},{"grupo":"SEAC","baseTotal":33,"engajados":3,"percentualEngajamento":9.09},{"grupo":"SEMAS","baseTotal":45,"engajados":4,"percentualEngajamento":8.89},{"grupo":"CONSANPA","baseTotal":85,"engajados":7,"percentualEngajamento":8.24},{"grupo":"SEDUC","baseTotal":45,"engajados":3,"percentualEngajamento":6.67},{"grupo":"ADEPARA","baseTotal":16,"engajados":1,"percentualEngajamento":6.25},{"grupo":"SEOP","baseTotal":160,"engajados":9,"percentualEngajamento":5.63},{"grupo":"SETUR","baseTotal":18,"engajados":0,"percentualEngajamento":0},{"grupo":"SESPA","baseTotal":18,"engajados":0,"percentualEngajamento":0},{"grupo":"ARCON","baseTotal":13,"engajados":0,"percentualEngajamento":0},{"grupo":"SEGUP","baseTotal":21,"engajados":0,"percentualEngajamento":0},{"grupo":"ITERPA","baseTotal":25,"engajados":0,"percentualEngajamento":0},{"grupo":"BANPARA","baseTotal":22,"engajados":0,"percentualEngajamento":0}]},{"id_missao":"df905f54-e2b8-409c-8fe4-8bd4d56720cd","nome_missao":"13-03-engaja-04-a","ranking":[{"grupo":"IASEP","baseTotal":22,"engajados":18,"percentualEngajamento":81.82},{"grupo":"SEDEME","baseTotal":8,"engajados":6,"percentualEngajamento":75},{"grupo":"DETRAN","baseTotal":32,"engajados":15,"percentualEngajamento":46.88},{"grupo":"HEMOPA","baseTotal":35,"engajados":16,"percentualEngajamento":45.71},{"grupo":"PARAPAZ","baseTotal":65,"engajados":23,"percentualEngajamento":35.38},{"grupo":"SEPLAD","baseTotal":128,"engajados":40,"percentualEngajamento":31.25},{"grupo":"SEFA","baseTotal":28,"engajados":8,"percentualEngajamento":28.57},{"grupo":"SETUR","baseTotal":18,"engajados":5,"percentualEngajamento":27.78},{"grupo":"SECOM","baseTotal":59,"engajados":16,"percentualEngajamento":27.12},{"grupo":"SEMAS","baseTotal":45,"engajados":12,"percentualEngajamento":26.67},{"grupo":"FAPESPA","baseTotal":45,"engajados":12,"percentualEngajamento":26.67},{"grupo":"ARCON","baseTotal":13,"engajados":2,"percentualEngajamento":15.38},{"grupo":"SEAC","baseTotal":33,"engajados":5,"percentualEngajamento":15.15},{"grupo":"SEGUP","baseTotal":21,"engajados":3,"percentualEngajamento":14.29},{"grupo":"CONSANPA","baseTotal":85,"engajados":10,"percentualEngajamento":11.76},{"grupo":"BANPARA","baseTotal":22,"engajados":2,"percentualEngajamento":9.09},{"grupo":"PRODEPA","baseTotal":24,"engajados":2,"percentualEngajamento":8.33},{"grupo":"SEOP","baseTotal":160,"engajados":13,"percentualEngajamento":8.13},{"grupo":"SEDUC","baseTotal":45,"engajados":2,"percentualEngajamento":4.44},{"grupo":"ITERPA","baseTotal":25,"engajados":1,"percentualEngajamento":4},{"grupo":"SESPA","baseTotal":18,"engajados":0,"percentualEngajamento":0},{"grupo":"ADEPARA","baseTotal":16,"engajados":0,"percentualEngajamento":0}]}]}}; 
+
+    const $ = id => document.getElementById(id);
+
+    function renderAll() {
+        const D = REPORT_DATA;
+        if(!D.meta) return;
+
+        document.title = D.meta.titulo;
+        $("header-title").textContent = D.meta.titulo;
+        $("header-subtitle").textContent = D.meta.periodo;
+        $("footer-texto").textContent = `Gerado em: ${new Date(D.meta.gerado_em).toLocaleString()} | Projeto ${D.meta.projeto}`;
+
+        $("objetivo-texto").textContent = D.qualitativo.objetivo;
+        $("analise-executiva").textContent = D.qualitativo.analise_executiva;
+        $("insights-texto").textContent = D.qualitativo.insights;
+        $("atencao-texto").textContent = D.qualitativo.pontos_atencao;
+        $("plano-texto").textContent = D.qualitativo.plano_ataque;
+        $("mitigacao-texto").textContent = D.qualitativo.mitigacao;
+        
+        if(D.qualitativo.evidencia_url) {
+            $("evidencia-container").classList.remove("hidden");
+            $("evidencia-img").src = D.qualitativo.evidencia_url;
+        }
+
+        const ultimaMissao = D.quantitativo.missoes[0];
+        const totalEngajados = ultimaMissao.ranking.reduce((acc, curr) => acc + curr.engajados, 0);
+        const kpis = [
+            { label: "Mobilizadores na Base", valor: ultimaMissao.ranking.reduce((acc, curr) => acc + curr.baseTotal, 0), cor: "blue" },
+            { label: "Engajados (Última Missão)", valor: totalEngajados, cor: "emerald" },
+            { label: "Missões no Período", valor: D.quantitativo.missoes.length, cor: "yellow" }
+        ];
+        $("kpi-cards").innerHTML = kpis.map(k => `
+            <div class="glass-panel p-6 rounded-2xl border-l-4 ${k.cor === 'blue' ? 'border-blue-500' : k.cor === 'emerald' ? 'border-emerald-500' : 'border-yellow-500'}">
+                <p class="text-xs text-slate-400 uppercase font-bold mb-1">${k.label}</p>
+                <span class="text-3xl font-black text-white">${k.valor}</span>
+            </div>
+        `).join("");
+
+        const barContainer = $("bar-chart-container");
+        barContainer.style.gridTemplateColumns = `repeat(${D.quantitativo.missoes.length}, minmax(0, 1fr))`;
+        
+        barContainer.innerHTML = D.quantitativo.missoes.map((m, i) => {
+            const mediaEngajamento = m.ranking.reduce((acc, curr) => acc + curr.percentualEngajamento, 0) / m.ranking.length;
+            return `
+                <div class="flex flex-col items-center gap-2 h-full justify-end group">
+                    <span class="text-emerald-400 font-bold text-[10px]">${mediaEngajamento.toFixed(1)}%</span>
+                    <div class="w-full bg-blue-600 rounded-t-lg hover:bg-blue-400 transition-all" style="height:${mediaEngajamento}%"></div>
+                    <span class="text-[9px] text-slate-500 font-bold uppercase text-center">${m.nome_missao}</span>
+                </div>
+            `;
+        }).join("");
+
+        $("rankings-container").innerHTML = D.quantitativo.missoes.map(m => `
+            <div class="glass-panel rounded-3xl overflow-hidden">
+                <div class="p-6 bg-slate-900/50 border-b border-slate-800">
+                    <h4 class="font-bold text-white italic">Ranking: ${m.nome_missao}</h4>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full custom-table">
+                        <thead>
+                            <tr>
+                                <th>Grupo</th>
+                                <th class="text-center">Base</th>
+                                <th class="text-center">Ativos</th>
+                                <th class="text-right">%</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${m.ranking.map(r => `
+                                <tr class="hover:bg-white/5">
+                                    <td class="font-bold text-slate-200">${r.grupo}</td>
+                                    <td class="text-center text-slate-400">${r.baseTotal}</td>
+                                    <td class="text-center text-slate-300">${r.engajados}</td>
+                                    <td class="text-right font-black ${r.percentualEngajamento > 50 ? 'text-green-400' : 'text-yellow-500'}">${r.percentualEngajamento}%</td>
+                                </tr>
+                            `).join("")}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `).join("");
+
+        lucide.createIcons();
+    }
+
+    function checkPassword() {
+        const input = $("password-input");
+        if (input.value === REPORT_DATA.meta.senha) {
+            $("lock-screen").style.display = "none";
+            $("report-content").style.opacity = "1";
+            // AGORA O SCROLL É LIBERADO AQUI
+            document.body.style.overflow = "auto";
+        } else {
+            $("error-message").classList.remove("hidden");
+        }
+    }
+
+    function switchTab(name) {
+        document.querySelectorAll(".tab-content").forEach(el => el.classList.remove("active"));
+        document.querySelectorAll(".nav-btn").forEach(el => el.classList.remove("active"));
+        $("tab-" + name).classList.add("active");
+        $("btn-" + name).classList.add("active");
+        // Scroll para o topo ao trocar de aba para facilitar a leitura
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    renderAll();
+    </script>
+</body>
+</html>
