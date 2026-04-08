@@ -2097,161 +2097,195 @@ xVVeYqy,9qEbvb1,2026-04-07 20:12:42,Agean Tenório De Carvalho - Águas Belas,PF
       
 
     function buildMeetingSection(meetingName, targetId, accent = 'blue') {
-      const rows = getSelectedMeetingData(meetingName);
-      const filteredRows = getFilteredRows(rows);
-      const matchedRows = rows.filter(item => item.nome || item.lider || item.comunidade);
-      const ranking = buildLeaderRanking(rows);
-      const top3 = ranking.slice(0, 3);
+    const rows = getSelectedMeetingData(meetingName);
+    const filteredRows = getFilteredRows(rows);
+    const matchedRows = rows.filter(item => item.nome || item.lider || item.comunidade);
 
-      const accentConfig = {
-        blue: {
-          titleClass: 'text-blue-300',
-          badgeClass: 'badge-ok',
-          borderClass: 'border-blue-500',
-          glowClass: 'glow-blue',
-          panelAccent: 'from-blue-500/10 to-emerald-500/5'
-        },
-        purple: {
-          titleClass: 'text-purple-300',
-          badgeClass: 'badge-miss',
-          borderClass: 'border-purple-500',
-          glowClass: 'glow-purple',
-          panelAccent: 'from-purple-500/10 to-blue-500/5'
-        }
-      }[accent];
+    const isLiderancasView = meetingName === 'Lideranças MobilizaPE';
 
-      const html = `
-        <div class="glass-panel ${accentConfig.glowClass} rounded-3xl p-5 sm:p-6 border-t-4 ${accentConfig.borderClass}">
-          <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-5">
-            <div>
-              <p class="text-xs uppercase tracking-[0.18em] ${accentConfig.titleClass} font-bold mb-2">Visão do dia</p>
-              <h3 class="text-2xl font-black text-white">${meetingName}</h3>
-              <p class="text-slate-400 text-sm mt-2">Data selecionada: ${formatDateBR(STATE.selectedDate)}</p>
-            </div>
-            <span class="badge ${accentConfig.badgeClass}">${rows.length} presença(s) única(s)</span>
-          </div>
+    const ranking = isLiderancasView ? [] : buildLeaderRanking(rows);
+    const top3 = isLiderancasView ? [] : ranking.slice(0, 3);
 
-          <div class="grid md:grid-cols-3 gap-4 mb-6">
-            <div class="glass-panel rounded-2xl p-4 border border-white/5">
-              <p class="text-xs uppercase tracking-[0.18em] text-slate-400 font-bold mb-2">Total presentes</p>
-              <div class="text-3xl font-black text-white mono">${rows.length}</div>
-            </div>
-            <div class="glass-panel rounded-2xl p-4 border border-white/5">
-              <p class="text-xs uppercase tracking-[0.18em] text-slate-400 font-bold mb-2">Com dados da base</p>
-              <div class="text-3xl font-black text-white mono">${matchedRows.length}</div>
-            </div>
-            <div class="glass-panel rounded-2xl p-4 border border-white/5">
-              <p class="text-xs uppercase tracking-[0.18em] text-slate-400 font-bold mb-2">Lideranças com presença</p>
-              <div class="text-3xl font-black text-white mono">${ranking.filter(item => item.lider !== '(sem líder)').length}</div>
-            </div>
-          </div>
-
-          <div class="glass-panel rounded-2xl p-4 sm:p-5 border border-white/5 mb-6">
-            <div class="flex items-center justify-between gap-3 mb-4">
-              <h4 class="text-lg font-bold text-white">Top 3 lideranças</h4>
-              <span class="text-xs text-slate-400 uppercase tracking-[0.18em]">Pódio</span>
-            </div>
-            ${top3.length ? `
-              <div class="grid md:grid-cols-3 gap-4">
-                ${top3.map((item, index) => `
-                  <div class="podium-card rounded-2xl p-5 bg-gradient-to-br ${index === 0 ? 'from-yellow-500/18 to-yellow-300/5 border border-yellow-400/25' : index === 1 ? 'from-slate-300/12 to-slate-50/5 border border-slate-300/20' : 'from-amber-700/18 to-amber-300/5 border border-amber-500/25'}">
-                    <div class="podium-rank">${index + 1}</div>
-                    <p class="text-xs uppercase tracking-[0.18em] text-slate-400 font-bold mb-3">${index === 0 ? '1º lugar' : index === 1 ? '2º lugar' : '3º lugar'}</p>
-                    <h5 class="text-white font-extrabold text-lg leading-tight pr-10">${escapeHtml(item.lider)}</h5>
-                    <div class="mt-5 space-y-2">
-                      <p class="text-slate-300 text-sm"><span class="font-bold text-white mono">${item.presentes}</span> pessoa(s) levadas</p>
-                      <p class="text-slate-300 text-sm">Base total: <span class="font-bold text-white mono">${item.baseTotal}</span></p>
-                      <p class="text-slate-300 text-sm">Ativação: <span class="font-bold text-white mono">${item.ativacao.toFixed(1)}%</span></p>
-                    </div>
-                  </div>
-                `).join('')}
-              </div>
-            ` : `
-              <div class="empty-state rounded-2xl p-6 text-slate-300 text-sm">
-                Não há lideranças com presença nesta data.
-              </div>
-            `}
-          </div>
-
-          <div class="glass-panel rounded-2xl overflow-hidden border border-white/5 mb-6">
-            <div class="p-4 sm:p-5 border-b border-white/5 flex items-center justify-between gap-3">
-              <div>
-                <h4 class="text-lg font-bold text-white">Ranking completo de lideranças</h4>
-                <p class="text-slate-400 text-sm">Mostra quantas pessoas cada líder levou e o percentual sobre a base total dele.</p>
-              </div>
-            </div>
-            ${ranking.length ? `
-              <div class="overflow-x-auto max-h-[420px]">
-                <table class="w-full custom-table">
-                  <thead>
-                    <tr>
-                      <th>Líder</th>
-                      <th>Pessoas levadas</th>
-                      <th>Base total</th>
-                      <th>% de ativação</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    ${ranking.map(item => `
-                      <tr>
-                        <td class="font-semibold text-white">${escapeHtml(item.lider)}</td>
-                        <td class="mono">${item.presentes}</td>
-                        <td class="mono">${item.baseTotal}</td>
-                        <td class="mono font-bold ${item.ativacao >= 20 ? 'text-emerald-400' : item.ativacao > 0 ? 'text-yellow-400' : 'text-slate-400'}">${item.ativacao.toFixed(1)}%</td>
-                      </tr>
-                    `).join('')}
-                  </tbody>
-                </table>
-              </div>
-            ` : `
-              <div class="p-6 text-slate-300 text-sm">Sem dados para ranking nesta data.</div>
-            `}
-          </div>
-
-          <div class="glass-panel rounded-2xl overflow-hidden border border-white/5">
-            <div class="p-4 sm:p-5 border-b border-white/5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-              <div>
-                <h4 class="text-lg font-bold text-white">Lista de participantes</h4>
-                <p class="text-slate-400 text-sm">Campos exibidos: Número, Nome, Líder e Comunidade.</p>
-              </div>
-              <span class="badge badge-miss">${filteredRows.length} registro(s) exibido(s)</span>
-            </div>
-            ${filteredRows.length ? `
-              <div class="overflow-auto max-h-[560px]">
-                <table class="w-full custom-table">
-                  <thead>
-                    <tr>
-                      <th>Número</th>
-                      <th>Nome</th>
-                      <th>Líder</th>
-                      <th>Comunidade</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    ${filteredRows.map(item => `
-                      <tr>
-                        <td class="mono font-semibold text-white">${escapeHtml(item.numero)}</td>
-                        <td>${escapeHtml(item.nome || '(sem dados)')}</td>
-                        <td>${escapeHtml(item.lider || '(sem dados)')}</td>
-                        <td>${escapeHtml(item.comunidade || '(sem dados)')}</td>
-                      </tr>
-                    `).join('')}
-                  </tbody>
-                </table>
-              </div>
-            ` : `
-              <div class="p-6">
-                <div class="empty-state rounded-2xl p-6 text-slate-300 text-sm">
-                  Nenhum participante encontrado para este filtro.
-                </div>
-              </div>
-            `}
-          </div>
-        </div>
-      `;
-
-      $(targetId).innerHTML = html;
+    const accentConfig = {
+    blue: {
+      titleClass: 'text-blue-300',
+      badgeClass: 'badge-ok',
+      borderClass: 'border-blue-500',
+      glowClass: 'glow-blue',
+      panelAccent: 'from-blue-500/10 to-emerald-500/5'
+    },
+    purple: {
+      titleClass: 'text-purple-300',
+      badgeClass: 'badge-miss',
+      borderClass: 'border-purple-500',
+      glowClass: 'glow-purple',
+      panelAccent: 'from-purple-500/10 to-blue-500/5'
     }
+  }[accent];
+
+  const html = `
+    <div class="glass-panel ${accentConfig.glowClass} rounded-3xl p-5 sm:p-6 border-t-4 ${accentConfig.borderClass}">
+      <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-5">
+        <div>
+          <p class="text-xs uppercase tracking-[0.18em] ${accentConfig.titleClass} font-bold mb-2">Visão da reunião</p>
+          <h3 class="text-2xl font-black text-white">${meetingName}</h3>
+          <p class="text-slate-300 text-sm mt-2">
+            ${isLiderancasView
+              ? 'Lista de participantes da reunião de lideranças no dia selecionado.'
+              : 'Painel com totais, lista completa de participantes e desempenho por liderança.'}
+          </p>
+        </div>
+        <span class="badge ${accentConfig.badgeClass}">
+          ${filteredRows.length} participante(s)
+        </span>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-4 mb-6">
+        <div class="glass-panel rounded-2xl p-4 metric-card">
+          <p class="text-xs uppercase tracking-[0.16em] text-slate-400 font-bold mb-2">Total na reunião</p>
+          <div class="text-3xl font-black text-white mono">${filteredRows.length}</div>
+        </div>
+
+        <div class="glass-panel rounded-2xl p-4 metric-card">
+          <p class="text-xs uppercase tracking-[0.16em] text-slate-400 font-bold mb-2">Com correspondência na base</p>
+          <div class="text-3xl font-black text-white mono">${filteredRows.filter(item => item.nome || item.lider || item.comunidade).length}</div>
+        </div>
+
+        <div class="glass-panel rounded-2xl p-4 metric-card">
+          <p class="text-xs uppercase tracking-[0.16em] text-slate-400 font-bold mb-2">Sem correspondência</p>
+          <div class="text-3xl font-black text-white mono">${filteredRows.filter(item => !item.nome && !item.lider && !item.comunidade).length}</div>
+        </div>
+      </div>
+
+      ${
+        !isLiderancasView
+          ? `
+          <div class="glass-panel rounded-3xl p-5 sm:p-6 mb-6">
+            <div class="flex items-start justify-between gap-3 mb-5">
+              <div>
+                <h4 class="text-xl font-bold text-white">Top 3 lideranças</h4>
+                <p class="text-slate-400 text-sm">Pódio</p>
+              </div>
+              <span class="text-[11px] uppercase tracking-[0.18em] text-slate-500 font-bold">Pódio</span>
+            </div>
+
+            ${
+              top3.length
+                ? `
+                <div class="grid md:grid-cols-3 gap-4">
+                  ${top3.map((item, index) => `
+                    <div class="podium-card glass-panel rounded-2xl p-5 border ${index === 0 ? 'border-yellow-500/40' : 'border-white/10'}">
+                      <div class="podium-rank">${index + 1}</div>
+                      <p class="text-xs uppercase tracking-[0.18em] text-slate-400 font-bold mb-3">${index + 1}º lugar</p>
+                      <h5 class="text-2xl font-black text-white leading-tight mb-4">${item.lider}</h5>
+                      <div class="space-y-2 text-sm text-slate-300">
+                        <p><span class="font-bold text-white mono">${item.presentes}</span> pessoa(s) levadas</p>
+                        <p>Base total: <span class="font-bold text-white mono">${item.baseTotal}</span></p>
+                        <p>Ativação: <span class="font-bold text-white mono">${item.ativacao.toFixed(1)}%</span></p>
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+                `
+                : `
+                <div class="empty-state rounded-2xl p-6 text-slate-300">
+                  Nenhuma liderança encontrada para o período selecionado.
+                </div>
+                `
+            }
+          </div>
+
+          <div class="glass-panel rounded-3xl overflow-hidden mb-6">
+            <div class="p-5 sm:p-6 border-b border-white/10">
+              <h4 class="text-xl font-bold text-white">Ranking completo de lideranças</h4>
+              <p class="text-slate-400 text-sm">Mostra quantas pessoas cada líder levou e o percentual sobre a base total dele.</p>
+            </div>
+
+            ${
+              ranking.length
+                ? `
+                <div class="max-h-[420px] overflow-auto">
+                  <table class="w-full custom-table">
+                    <thead>
+                      <tr>
+                        <th>Líder</th>
+                        <th>Pessoas levadas</th>
+                        <th>Base total</th>
+                        <th>% de ativação</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${ranking.map(item => `
+                        <tr>
+                          <td class="font-bold text-white">${item.lider}</td>
+                          <td class="mono">${item.presentes}</td>
+                          <td class="mono">${item.baseTotal}</td>
+                          <td class="mono font-bold">${item.ativacao.toFixed(1)}%</td>
+                        </tr>
+                      `).join('')}
+                    </tbody>
+                  </table>
+                </div>
+                `
+                : `
+                <div class="p-6 text-slate-300">Nenhuma liderança encontrada para o período selecionado.</div>
+                `
+            }
+          </div>
+          `
+          : ''
+      }
+
+      <div class="glass-panel rounded-3xl overflow-hidden">
+        <div class="p-5 sm:p-6 border-b border-white/10">
+          <h4 class="text-xl font-bold text-white">Lista de participantes</h4>
+          <p class="text-slate-400 text-sm">
+            ${isLiderancasView
+              ? 'Participantes da reunião de lideranças.'
+              : 'Participantes da reunião com cruzamento na base geral.'}
+          </p>
+        </div>
+
+        ${
+          filteredRows.length
+            ? `
+            <div class="max-h-[520px] overflow-auto">
+              <table class="w-full custom-table">
+                <thead>
+                  <tr>
+                    <th>Número</th>
+                    <th>Nome</th>
+                    <th>Líder</th>
+                    <th>Comunidade</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${filteredRows.map(item => `
+                    <tr>
+                      <td class="mono">${item.numero || '(sem dados)'}</td>
+                      <td>${item.nome || '(sem dados)'}</td>
+                      <td>${item.lider || '(sem dados)'}</td>
+                      <td>${item.comunidade || '(sem dados)'}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+            `
+            : `
+            <div class="p-6">
+              <div class="empty-state rounded-2xl p-6 text-slate-300">
+                Nenhum participante encontrado para os filtros aplicados.
+              </div>
+            </div>
+            `
+        }
+      </div>
+    </div>
+  `;
+
+  document.getElementById(targetId).innerHTML = html;
+}
 
     function renderDashboard() {
       renderGlobalKpis();
