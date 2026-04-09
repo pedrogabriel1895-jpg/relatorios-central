@@ -134,6 +134,64 @@
       border-radius: 1rem;
       padding: .9rem 1rem;
     }
+    .date-input-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: .7rem;
+    }
+    .date-text-input {
+      width: 100%;
+      min-width: 0;
+      background: rgba(2, 6, 23, 0.82);
+      color: #fff;
+      outline: none;
+      border: 1px solid rgb(51 65 85 / 1);
+      border-radius: .95rem;
+      padding: .72rem .9rem;
+      font-size: .95rem;
+      letter-spacing: .01em;
+      transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+    }
+    .date-text-input:focus {
+      border-color: rgba(59, 130, 246, 0.95);
+      box-shadow: 0 0 0 3px rgba(59,130,246,.12);
+      background: rgba(2, 6, 23, 0.95);
+    }
+    .date-text-input::placeholder {
+      color: #94a3b8;
+    }
+    .date-picker-btn {
+      width: 100%;
+      min-height: 2.65rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: .55rem;
+      border-radius: .95rem;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(15, 23, 42, 0.92);
+      color: #cbd5e1;
+      flex-shrink: 0;
+      transition: all .2s ease;
+      font-size: .9rem;
+      font-weight: 600;
+    }
+    .date-picker-btn:hover {
+      background: rgba(30, 41, 59, 0.96);
+      color: #fff;
+      border-color: rgba(59,130,246,.35);
+    }
+    .native-date-input {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      pointer-events: none;
+      width: 100%;
+      height: 100%;
+    }
+    .date-picker-btn span {
+      line-height: 1;
+    }
     .empty-state {
       border: 1px dashed rgba(148,163,184,0.35);
       background: rgba(15,23,42,0.45);
@@ -163,8 +221,8 @@
   <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-8">
     <section id="tab-usinas" class="tab-content active space-y-8">
       <div class="glass-panel glow-blue rounded-3xl p-5 sm:p-6">
-        <div class="flex flex-col xl:flex-row xl:items-end xl:justify-between gap-5">
-          <div>
+        <div class="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-5">
+          <div class="xl:max-w-[24rem] xl:pt-1 self-start">
             <p class="text-xs uppercase tracking-[0.2em] text-slate-400 font-bold mb-2">Filtro principal</p>
             <h2 class="text-2xl sm:text-3xl font-black text-white">Usinas</h2>
             <p class="text-slate-300 text-sm mt-2 max-w-3xl">
@@ -173,14 +231,28 @@
             </p>
           </div>
 
-          <div class="grid md:grid-cols-2 xl:grid-cols-5 gap-3 w-full xl:w-auto">
-            <label class="filter-chip">
+          <div class="grid md:grid-cols-2 xl:grid-cols-5 gap-3 w-full xl:w-auto xl:flex-1">
+            <label class="filter-chip relative">
               <span class="block text-[11px] uppercase tracking-[0.18em] text-slate-400 font-semibold mb-2">Data inicial</span>
-              <input id="start-date" type="date" class="w-full bg-slate-950/80 border border-slate-700 rounded-xl px-3 py-2.5 text-white outline-none focus:border-blue-500">
+              <div class="date-input-wrap">
+                <input id="start-date-text" type="text" inputmode="numeric" placeholder="dd/mm/aaaa" maxlength="10" class="date-text-input" autocomplete="off">
+                <button type="button" class="date-picker-btn" data-picker-target="start-date" aria-label="Abrir calendário da data inicial">
+                  <i data-lucide="calendar-days" class="w-4 h-4"></i>
+                  <span>Escolher no calendário</span>
+                </button>
+              </div>
+              <input id="start-date" type="date" class="native-date-input" tabindex="-1" aria-hidden="true">
             </label>
-            <label class="filter-chip">
+            <label class="filter-chip relative">
               <span class="block text-[11px] uppercase tracking-[0.18em] text-slate-400 font-semibold mb-2">Data final</span>
-              <input id="end-date" type="date" class="w-full bg-slate-950/80 border border-slate-700 rounded-xl px-3 py-2.5 text-white outline-none focus:border-blue-500">
+              <div class="date-input-wrap">
+                <input id="end-date-text" type="text" inputmode="numeric" placeholder="dd/mm/aaaa" maxlength="10" class="date-text-input" autocomplete="off">
+                <button type="button" class="date-picker-btn" data-picker-target="end-date" aria-label="Abrir calendário da data final">
+                  <i data-lucide="calendar-days" class="w-4 h-4"></i>
+                  <span>Escolher no calendário</span>
+                </button>
+              </div>
+              <input id="end-date" type="date" class="native-date-input" tabindex="-1" aria-hidden="true">
             </label>
             <div class="filter-chip">
               <span class="block text-[11px] uppercase tracking-[0.18em] text-slate-400 font-semibold mb-2">Atalhos</span>
@@ -421,6 +493,48 @@
       return { min: dates[0], max: dates[dates.length - 1] };
     }
 
+    function formatDateInputValue(value) {
+      const digits = String(value || '').replace(/\D/g, '').slice(0, 8);
+      if (digits.length <= 2) return digits;
+      if (digits.length <= 4) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+      return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+    }
+
+    function parseDateBRToISO(value) {
+      const match = String(value || '').trim().match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+      if (!match) return null;
+      const [, dd, mm, yyyy] = match;
+      const iso = `${yyyy}-${mm}-${dd}`;
+      const parsed = parseISODateLocal(iso);
+      if (Number.isNaN(parsed.getTime())) return null;
+      if (toISODate(parsed) !== iso) return null;
+      return iso;
+    }
+
+    function syncTextInputFromNative(nativeId, textId) {
+      const nativeInput = $(nativeId);
+      const textInput = $(textId);
+      textInput.value = nativeInput.value ? formatDateBR(nativeInput.value) : '';
+    }
+
+    function applyTextDateValue(nativeId, textId, shouldRender = true) {
+      const nativeInput = $(nativeId);
+      const textInput = $(textId);
+      textInput.value = formatDateInputValue(textInput.value);
+      const iso = parseDateBRToISO(textInput.value);
+
+      if (iso) {
+        nativeInput.value = iso;
+        textInput.value = formatDateBR(iso);
+      } else if (!textInput.value.trim()) {
+        nativeInput.value = '';
+      } else {
+        syncTextInputFromNative(nativeId, textId);
+      }
+
+      if (shouldRender) renderDashboard();
+    }
+
     function getSelectedRange() {
       const start = $('start-date').value || null;
       const end = $('end-date').value || null;
@@ -549,8 +663,16 @@
       const entries = Object.entries(totals).sort((a, b) => b[1] - a[1]);
       const leader = entries[0] || ['—', 0];
       const totalEntries = getTotalEntries(rows);
-      const totalDates = Math.max(getUniqueDates(rows).length, 1);
-      const avgDaily = totalEntries / totalDates;
+      const { start, end } = normalizeRange(getSelectedRange());
+
+      const startDate = parseISODateLocal(start);
+      const endDate = parseISODateLocal(end);
+
+      const diffMs = endDate - startDate;
+      const totalDays = Math.max(Math.floor(diffMs / 86400000) + 1, 1);
+
+      const avgDaily = totalEntries / totalDays;
+      
       const cards = [
         {
           title: 'Leads no período',
@@ -918,11 +1040,46 @@
     }
 
     function bindEvents() {
-      $('start-date').addEventListener('change', renderDashboard);
-      $('end-date').addEventListener('change', renderDashboard);
+      $('start-date').addEventListener('change', () => {
+        syncTextInputFromNative('start-date', 'start-date-text');
+        renderDashboard();
+      });
+      $('end-date').addEventListener('change', () => {
+        syncTextInputFromNative('end-date', 'end-date-text');
+        renderDashboard();
+      });
+
+      [['start-date', 'start-date-text'], ['end-date', 'end-date-text']].forEach(([nativeId, textId]) => {
+        const textInput = $(textId);
+        textInput.addEventListener('input', () => {
+          textInput.value = formatDateInputValue(textInput.value);
+        });
+        textInput.addEventListener('blur', () => applyTextDateValue(nativeId, textId));
+        textInput.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter') {
+            event.preventDefault();
+            applyTextDateValue(nativeId, textId);
+          }
+        });
+      });
+
+      document.querySelectorAll('[data-picker-target]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const input = $(btn.dataset.pickerTarget);
+          if (typeof input.showPicker === 'function') {
+            input.showPicker();
+          } else {
+            input.focus();
+            input.click();
+          }
+        });
+      });
+
       $('reset-btn').addEventListener('click', () => {
         $('start-date').value = '';
         $('end-date').value = '';
+        syncTextInputFromNative('start-date', 'start-date-text');
+        syncTextInputFromNative('end-date', 'end-date-text');
         renderDashboard();
       });
       document.querySelectorAll('.preset-btn').forEach(btn => {
@@ -938,6 +1095,8 @@
         $('start-date').max = bounds.max;
         $('end-date').min = bounds.min;
         $('end-date').max = bounds.max;
+        syncTextInputFromNative('start-date', 'start-date-text');
+        syncTextInputFromNative('end-date', 'end-date-text');
         bindEvents();
         renderDashboard();
         lucide.createIcons();
