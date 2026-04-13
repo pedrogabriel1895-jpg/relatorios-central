@@ -217,6 +217,107 @@
       border: 1px dashed rgba(148,163,184,0.35);
       background: rgba(15,23,42,0.45);
     }
+    .scoreboard-panel {
+  position: relative;
+  border-width: 1px;
+  border-style: solid;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.scoreboard-panel-blue {
+  border-color: rgba(59, 130, 246, 0.28);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.03),
+    0 0 0 1px rgba(59,130,246,0.06),
+    0 0 22px rgba(59,130,246,0.10);
+}
+
+.scoreboard-panel-yellow {
+  border-color: rgba(234, 179, 8, 0.30);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.03),
+    0 0 0 1px rgba(234,179,8,0.06),
+    0 0 22px rgba(234,179,8,0.10);
+}
+
+.scoreboard-panel-emerald {
+  border-color: rgba(16, 185, 129, 0.28);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.03),
+    0 0 0 1px rgba(16,185,129,0.06),
+    0 0 22px rgba(16,185,129,0.10);
+}
+
+.scoreboard-panel-purple {
+  border-color: rgba(168, 85, 247, 0.28);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.03),
+    0 0 0 1px rgba(168,85,247,0.06),
+    0 0 22px rgba(168,85,247,0.10);
+}
+
+.scoreboard-header-blue {
+  border-bottom-color: rgba(59, 130, 246, 0.22) !important;
+}
+
+.scoreboard-header-yellow {
+  border-bottom-color: rgba(234, 179, 8, 0.22) !important;
+}
+
+.scoreboard-header-emerald {
+  border-bottom-color: rgba(16, 185, 129, 0.22) !important;
+}
+
+.scoreboard-header-purple {
+  border-bottom-color: rgba(168, 85, 247, 0.22) !important;
+}
+
+.scoreboard-title {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  line-height: 1.2;
+}
+
+.scoreboard-title-icon {
+  width: 2rem;
+  height: 2rem;
+  border-radius: .85rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(15, 23, 42, 0.92);
+  flex-shrink: 0;
+}
+
+.scoreboard-title-icon-blue {
+  color: #93c5fd;
+  background: rgba(59,130,246,0.12);
+  border-color: rgba(59,130,246,0.24);
+  box-shadow: 0 0 18px rgba(59,130,246,0.12);
+}
+
+.scoreboard-title-icon-yellow {
+  color: #fde68a;
+  background: rgba(234,179,8,0.12);
+  border-color: rgba(234,179,8,0.24);
+  box-shadow: 0 0 18px rgba(234,179,8,0.12);
+}
+
+.scoreboard-title-icon-emerald {
+  color: #6ee7b7;
+  background: rgba(16,185,129,0.12);
+  border-color: rgba(16,185,129,0.24);
+  box-shadow: 0 0 18px rgba(16,185,129,0.12);
+}
+
+.scoreboard-title-icon-purple {
+  color: #d8b4fe;
+  background: rgba(168,85,247,0.12);
+  border-color: rgba(168,85,247,0.24);
+  box-shadow: 0 0 18px rgba(168,85,247,0.12);
+}
   </style>
 </head>
 <body class="min-h-screen flex flex-col antialiased">
@@ -334,23 +435,33 @@
         </div>
 
         <div class="grid xl:grid-cols-12 gap-3 items-start">
-          <div class="glass-panel rounded-3xl p-3.5 sm:p-4 xl:col-span-7">
-            <div class="scoreboard-card-header mb-2.5">
-              <h4 class="text-base sm:text-lg font-bold text-white">Ranking por pontos no período</h4>
-              <p class="text-slate-400 text-xs sm:text-sm mt-1 leading-snug">Pontuação semanal acumulada considerando apenas o período selecionado.</p>
-            </div>
-            <div class="h-[170px] sm:h-[180px] xl:h-[190px]">
-              <canvas id="chart-scoreboard"></canvas>
-            </div>
-          </div>
+          <div class="glass-panel scoreboard-panel scoreboard-panel-purple rounded-3xl p-3.5 sm:p-4 xl:col-span-7">
+  <div class="scoreboard-card-header mb-2.5">
+    <h4 class="scoreboard-title text-base sm:text-lg font-bold text-white">
+      <span class="scoreboard-title-icon scoreboard-title-icon-purple">
+        <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+      </span>
+      Ranking por pontos no período
+    </h4>
+    <p class="text-slate-400 text-xs sm:text-sm mt-1 leading-snug">Pontuação semanal acumulada considerando apenas o período selecionado.</p>
+  </div>
+  <div class="h-[170px] sm:h-[180px] xl:h-[190px]">
+    <canvas id="chart-scoreboard"></canvas>
+  </div>
+</div>
 
-          <div class="glass-panel rounded-3xl overflow-hidden xl:col-span-5">
-            <div class="scoreboard-card-header p-3.5 sm:p-4 border-b border-white/10">
-              <h4 class="text-base sm:text-lg font-bold text-white">Tabela do período</h4>
-              <p class="text-slate-400 text-xs sm:text-sm mt-1 leading-snug">Usina, pontuação acumulada e entradas dentro do filtro.</p>
-            </div>
-            <div class="max-h-[208px] overflow-auto">
-              <table class="w-full custom-table compact-table">
+          <div class="glass-panel scoreboard-panel scoreboard-panel-blue rounded-3xl overflow-hidden xl:col-span-5">
+  <div class="scoreboard-card-header scoreboard-header-blue p-3.5 sm:p-4 border-b border-white/10">
+    <h4 class="scoreboard-title text-base sm:text-lg font-bold text-white">
+      <span class="scoreboard-title-icon scoreboard-title-icon-blue">
+        <i data-lucide="rows-3" class="w-4 h-4"></i>
+      </span>
+      Tabela do período
+    </h4>
+    <p class="text-slate-400 text-xs sm:text-sm mt-1 leading-snug">Usina, pontuação acumulada e entradas dentro do filtro.</p>
+  </div>
+  <div class="max-h-[208px] overflow-auto">
+    <table class="w-full custom-table compact-table">
                 <thead>
                   <tr>
                     <th>Posição</th>
@@ -364,13 +475,18 @@
             </div>
           </div>
 
-          <div class="glass-panel rounded-3xl overflow-hidden xl:col-span-6">
-            <div class="scoreboard-card-header p-3.5 sm:p-4 border-b border-white/10">
-              <h4 class="text-base sm:text-lg font-bold text-white">Placar Mensal</h4>
-              <p class="text-slate-400 text-xs sm:text-sm mt-1 leading-snug">Pontuação total do mês selecionado.</p>
-            </div>
-            <div class="max-h-[204px] overflow-auto">
-              <table class="w-full custom-table compact-table">
+          <div class="glass-panel scoreboard-panel scoreboard-panel-yellow rounded-3xl overflow-hidden xl:col-span-6">
+  <div class="scoreboard-card-header scoreboard-header-yellow p-3.5 sm:p-4 border-b border-white/10">
+    <h4 class="scoreboard-title text-base sm:text-lg font-bold text-white">
+      <span class="scoreboard-title-icon scoreboard-title-icon-yellow">
+        <i data-lucide="calendar-days" class="w-4 h-4"></i>
+      </span>
+      Placar Mensal
+    </h4>
+    <p class="text-slate-400 text-xs sm:text-sm mt-1 leading-snug">Pontuação total do mês selecionado.</p>
+  </div>
+  <div class="max-h-[204px] overflow-auto">
+    <table class="w-full custom-table compact-table">
                 <thead>
                   <tr>
                     <th>Posição</th>
@@ -384,13 +500,18 @@
             </div>
           </div>
 
-          <div class="glass-panel rounded-3xl overflow-hidden xl:col-span-6">
-            <div class="scoreboard-card-header p-3.5 sm:p-4 border-b border-white/10">
-              <h4 class="text-base sm:text-lg font-bold text-white">Placar Geral</h4>
-              <p class="text-slate-400 text-xs sm:text-sm mt-1 leading-snug">Acumulado de todas as semanas do projeto.</p>
-            </div>
-            <div class="max-h-[204px] overflow-auto">
-              <table class="w-full custom-table compact-table">
+          <div class="glass-panel scoreboard-panel scoreboard-panel-emerald rounded-3xl overflow-hidden xl:col-span-6">
+  <div class="scoreboard-card-header scoreboard-header-emerald p-3.5 sm:p-4 border-b border-white/10">
+    <h4 class="scoreboard-title text-base sm:text-lg font-bold text-white">
+      <span class="scoreboard-title-icon scoreboard-title-icon-emerald">
+        <i data-lucide="trophy" class="w-4 h-4"></i>
+      </span>
+      Placar Geral
+    </h4>
+    <p class="text-slate-400 text-xs sm:text-sm mt-1 leading-snug">Acumulado de todas as semanas do projeto.</p>
+  </div>
+  <div class="max-h-[204px] overflow-auto">
+    <table class="w-full custom-table compact-table">
                 <thead>
                   <tr>
                     <th>Posição</th>
@@ -655,15 +776,16 @@
         .sort((a, b) => b.points - a.points || b.entries - a.entries || a.project.localeCompare(b.project));
     }
 
-    function buildMonthlyScoreRows(rows, monthKey, cutoffDate) {
-      const effectiveCutoff = cutoffDate || getDateBounds().max;
-      const validWeekStarts = [...new Set(rows.map(row => getWeekStart(row.date)))]
-        .filter(weekStart => getMonthKey(weekStart) === monthKey)
-        .filter(weekStart => getWeekEndFromStart(weekStart) <= effectiveCutoff)
-        .sort();
+    function buildMonthlyScoreRows(rows, monthKey) {
+  const datasetMaxDate = getDateBounds().max;
 
-      const monthlyRows = rows.filter(row => validWeekStarts.includes(getWeekStart(row.date)));
-      return buildWeeklyScoreRows(monthlyRows);
+  const validWeekStarts = [...new Set(rows.map(row => getWeekStart(row.date)))]
+    .filter(weekStart => getMonthKey(weekStart) === monthKey)
+    .filter(weekStart => getWeekEndFromStart(weekStart) <= datasetMaxDate)
+    .sort();
+
+  const monthlyRows = rows.filter(row => validWeekStarts.includes(getWeekStart(row.date)));
+  return buildWeeklyScoreRows(monthlyRows);
     }
 
     function buildDailySeries(rows, project) {
@@ -882,10 +1004,9 @@
     }
 
     function renderScoreboard(rows) {
-      const periodRanking = buildWeeklyScoreRows(rows);
-      const activeMonth = getActiveMonthKey();
-      const { end: monthlyCutoffDate } = normalizeRange(getSelectedRange());
-      const monthlyRanking = buildMonthlyScoreRows(STATE.dataset.daily_counts, activeMonth, monthlyCutoffDate);
+  const periodRanking = buildWeeklyScoreRows(rows);
+  const activeMonth = getActiveMonthKey();
+  const monthlyRanking = buildMonthlyScoreRows(STATE.dataset.daily_counts, activeMonth);
       const generalRanking = buildWeeklyScoreRows(STATE.dataset.daily_counts).map(item => ({
         project: item.project,
         points: item.points,
