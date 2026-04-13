@@ -97,6 +97,27 @@
     .custom-table tbody tr:hover {
       background: rgba(255,255,255,0.04);
     }
+    .compact-table th {
+      padding: .58rem .72rem;
+      font-size: .64rem;
+      line-height: 1.1;
+    }
+    .compact-table td {
+      padding: .52rem .72rem;
+      font-size: .78rem;
+      line-height: 1.15;
+    }
+    .scoreboard-card-header {
+      min-height: 0;
+    }
+    .scoreboard-section {
+      padding: 1rem;
+    }
+    @media (min-width: 640px) {
+      .scoreboard-section {
+        padding: 1.15rem;
+      }
+    }
 
     .badge {
       display: inline-flex;
@@ -296,36 +317,40 @@
 
       <div class="grid xl:grid-cols-2 gap-6" id="usina-cards"></div>
 
-      <div class="glass-panel glow-yellow rounded-3xl p-5 sm:p-6">
-        <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 mb-5">
+      <div class="glass-panel glow-yellow rounded-3xl scoreboard-section">
+        <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-3 mb-3">
           <div>
-            <p class="text-xs uppercase tracking-[0.18em] text-yellow-300 font-bold mb-2">Gamificação</p>
-            <h3 class="text-xl font-bold text-white">Placar das Usinas</h3>
-            <p class="text-slate-300 text-sm mt-1 max-w-3xl">
+            <p class="text-xs uppercase tracking-[0.18em] text-yellow-300 font-bold mb-1.5">Gamificação</p>
+            <h3 class="text-lg sm:text-xl font-bold text-white">Placar das Usinas</h3>
+            <p class="text-slate-300 text-xs sm:text-sm mt-1 max-w-3xl leading-snug">
               A líder da semana recebe 100 pontos e as demais recebem proporcionalmente:
               <span class="text-white font-semibold">(entradas da usina / entradas da líder) × 100</span>.
             </p>
           </div>
-          <div class="flex flex-wrap gap-2">
-            <span class="badge badge-warn" id="monthly-badge">Mês do placar mensal</span>
+          <div class="flex flex-wrap gap-2 xl:justify-end xl:max-w-[38rem]">
+            <span class="badge badge-info" id="period-badge">Período analisado</span>
+            <span class="badge badge-warn" id="monthly-badge">Placar mensal</span>
           </div>
         </div>
 
-        <div class="grid 2xl:grid-cols-[1.2fr_.8fr] gap-6 mb-6">
-          <div class="glass-panel rounded-3xl p-5 sm:p-6">
-            <h4 class="text-xl font-bold text-white mb-4">Ranking por pontos no período</h4>
-            <div class="h-[340px]">
+        <div class="grid xl:grid-cols-12 gap-3 items-start">
+          <div class="glass-panel rounded-3xl p-3.5 sm:p-4 xl:col-span-7">
+            <div class="scoreboard-card-header mb-2.5">
+              <h4 class="text-base sm:text-lg font-bold text-white">Ranking por pontos no período</h4>
+              <p class="text-slate-400 text-xs sm:text-sm mt-1 leading-snug">Pontuação semanal acumulada considerando apenas o período selecionado.</p>
+            </div>
+            <div class="h-[170px] sm:h-[180px] xl:h-[190px]">
               <canvas id="chart-scoreboard"></canvas>
             </div>
           </div>
 
-          <div class="glass-panel rounded-3xl overflow-hidden">
-            <div class="p-5 sm:p-6 border-b border-white/10">
-              <h4 class="text-xl font-bold text-white">Tabela do período</h4>
-              <p class="text-slate-400 text-sm">Usina, pontuação acumulada e entradas dentro do filtro.</p>
+          <div class="glass-panel rounded-3xl overflow-hidden xl:col-span-5">
+            <div class="scoreboard-card-header p-3.5 sm:p-4 border-b border-white/10">
+              <h4 class="text-base sm:text-lg font-bold text-white">Tabela do período</h4>
+              <p class="text-slate-400 text-xs sm:text-sm mt-1 leading-snug">Usina, pontuação acumulada e entradas dentro do filtro.</p>
             </div>
-            <div class="max-h-[420px] overflow-auto">
-              <table class="w-full custom-table">
+            <div class="max-h-[208px] overflow-auto">
+              <table class="w-full custom-table compact-table">
                 <thead>
                   <tr>
                     <th>Posição</th>
@@ -338,16 +363,14 @@
               </table>
             </div>
           </div>
-        </div>
 
-        <div class="grid xl:grid-cols-2 gap-6">
-          <div class="glass-panel rounded-3xl overflow-hidden">
-            <div class="p-5 sm:p-6 border-b border-white/10">
-              <h4 class="text-xl font-bold text-white">Placar mensal</h4>
-              <p class="text-slate-400 text-sm">Por padrão mostra o mês atual. Com filtro, usa o mês da data inicial selecionada.</p>
+          <div class="glass-panel rounded-3xl overflow-hidden xl:col-span-6">
+            <div class="scoreboard-card-header p-3.5 sm:p-4 border-b border-white/10">
+              <h4 class="text-base sm:text-lg font-bold text-white">Placar Mensal</h4>
+              <p class="text-slate-400 text-xs sm:text-sm mt-1 leading-snug">Pontuação total do mês selecionado.</p>
             </div>
-            <div class="max-h-[420px] overflow-auto">
-              <table class="w-full custom-table">
+            <div class="max-h-[204px] overflow-auto">
+              <table class="w-full custom-table compact-table">
                 <thead>
                   <tr>
                     <th>Posição</th>
@@ -361,13 +384,13 @@
             </div>
           </div>
 
-          <div class="glass-panel rounded-3xl overflow-hidden">
-            <div class="p-5 sm:p-6 border-b border-white/10">
-              <h4 class="text-xl font-bold text-white">Placar geral do filtro</h4>
-              <p class="text-slate-400 text-sm">Soma a pontuação semanal acumulada dentro do período selecionado.</p>
+          <div class="glass-panel rounded-3xl overflow-hidden xl:col-span-6">
+            <div class="scoreboard-card-header p-3.5 sm:p-4 border-b border-white/10">
+              <h4 class="text-base sm:text-lg font-bold text-white">Placar Geral</h4>
+              <p class="text-slate-400 text-xs sm:text-sm mt-1 leading-snug">Acumulado de todas as semanas do projeto.</p>
             </div>
-            <div class="max-h-[420px] overflow-auto">
-              <table class="w-full custom-table">
+            <div class="max-h-[204px] overflow-auto">
+              <table class="w-full custom-table compact-table">
                 <thead>
                   <tr>
                     <th>Posição</th>
@@ -581,6 +604,12 @@
       return toISODate(date);
     }
 
+    function getWeekEndFromStart(weekStartStr) {
+      const date = parseISODateLocal(weekStartStr);
+      date.setDate(date.getDate() + 6);
+      return toISODate(date);
+    }
+
     function getMonthKey(dateStr) {
       return dateStr.slice(0, 7);
     }
@@ -626,9 +655,15 @@
         .sort((a, b) => b.points - a.points || b.entries - a.entries || a.project.localeCompare(b.project));
     }
 
-    function buildMonthlyScoreRows(rows, monthKey) {
-      const monthRows = rows.filter(row => getMonthKey(row.date) === monthKey);
-      return buildWeeklyScoreRows(monthRows);
+    function buildMonthlyScoreRows(rows, monthKey, cutoffDate) {
+      const effectiveCutoff = cutoffDate || getDateBounds().max;
+      const validWeekStarts = [...new Set(rows.map(row => getWeekStart(row.date)))]
+        .filter(weekStart => getMonthKey(weekStart) === monthKey)
+        .filter(weekStart => getWeekEndFromStart(weekStart) <= effectiveCutoff)
+        .sort();
+
+      const monthlyRows = rows.filter(row => validWeekStarts.includes(getWeekStart(row.date)));
+      return buildWeeklyScoreRows(monthlyRows);
     }
 
     function buildDailySeries(rows, project) {
@@ -656,6 +691,12 @@
       }
       const { start, end } = normalizeRange(raw);
       $('applied-period').textContent = `${formatDateBR(start)} até ${formatDateBR(end)}`;
+    }
+
+    function getAnalyzedPeriodLabel() {
+      const raw = getSelectedRange();
+      const bounds = !raw.start && !raw.end ? getDateBounds() : normalizeRange(raw);
+      return `Período analisado: ${formatDateBR(bounds.start || bounds.min)} a ${formatDateBR(bounds.end || bounds.max)}`;
     }
 
     function renderGlobalKpis(rows) {
@@ -843,8 +884,9 @@
     function renderScoreboard(rows) {
       const periodRanking = buildWeeklyScoreRows(rows);
       const activeMonth = getActiveMonthKey();
-      const monthlyRanking = buildMonthlyScoreRows(rows, activeMonth);
-      const generalRanking = periodRanking.map(item => ({
+      const { end: monthlyCutoffDate } = normalizeRange(getSelectedRange());
+      const monthlyRanking = buildMonthlyScoreRows(STATE.dataset.daily_counts, activeMonth, monthlyCutoffDate);
+      const generalRanking = buildWeeklyScoreRows(STATE.dataset.daily_counts).map(item => ({
         project: item.project,
         points: item.points,
         weeks: item.weeks
@@ -855,6 +897,7 @@
       STATE.rankingGeneral = generalRanking;
       STATE.activeMonth = activeMonth;
 
+      $('period-badge').textContent = getAnalyzedPeriodLabel();
       $('monthly-badge').textContent = `Placar mensal: ${formatMonthBR(activeMonth)}`;
 
       buildBarChart(
@@ -894,7 +937,7 @@
           <td class="mono">${formatNumber(item.weeks)}</td>
         </tr>
       `).join('') || `
-        <tr><td colspan="4"><div class="p-4 text-slate-300">Sem dados no período.</div></td></tr>
+        <tr><td colspan="4"><div class="p-4 text-slate-300">Sem dados disponíveis.</div></td></tr>
       `;
     }
 
